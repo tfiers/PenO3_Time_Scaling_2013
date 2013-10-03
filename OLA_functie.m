@@ -7,7 +7,7 @@ function [ timeshifted_signal ] = Timeshift( bestandsnaam, sample_rate, alpha, )
     SAMPLING_RATE = 44100; % deze sampling rate komt overeen met 1 seconde
     player = audioplayer(input, SAMPLING_RATE);  %player aanmaken (handig om geluid te kunnen stoppen en starten)
 
-    % Breek op in stukjes
+    % Break into pieces.
     frames = [];
     STEP = SAMPLING_RATE / 10; % The smaller the step, the smaller the frames and the exacter your signal.
     for i = 1:STEP:size(input, 1) % Size(input,1) is the length of one row of the input signal.
