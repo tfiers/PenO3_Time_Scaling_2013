@@ -1,23 +1,37 @@
 function [ timeshifted_signal ] = timeshift_OLA(filename, sample_rate, alpha, fps, overlap)
-    tic
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
     % Speeds up/slows down audio with Overlap and Add (OLA).
+    
+    % filename      A string giving the absolute or relative path of a .wav
+    %               file. E.g. 'Speech Materials\annelies1.wav' or
+    %               'C:\annelies1.wav'.
+    % sample_rate   E.g. 44100, which means that 44100 samples represent 1
+    %               second.
+    % alpha         A value in (0,2) that determines the amount of time
+    %               stretching. alpha in (0,1) speeds up the signal, alpha
+    %               in (1,2) slows it down.
+    % fps           Frames per second. Determines in how many frames the
+    %               input signal will be chopped and how long they will be.
+    % overlap       A value in (0,1). E.g. 0.5 means the frames will be
+    %               overlapped for 50%.
+    
+    
+    tic % For measuring how long this function took to complete.
+
     input = audioread(filename); % load wav-file
-    %,Y = resample(input, 2, 1); % resample at half the speed
-    %SAMPLING_RATE = 44100; % this sample rate equals 1 second
+    
+    % Y = resample(input, 2, 1); % resample at half the speed
     % player = audioplayer(input, sample_rate);  %player element, easy to play/pause sound
+    
     % Break into pieces.
+    frame_size = round(sample_rate / fps);
     framesl = [];
     framesr = [];
-    frame_size = round(sample_rate / fps);
-    for i = 1:round(frame_size*overlap):size(input, 1) % Size(input,1) is the number of rows of the input signal.
+    for i = 1:round(frame_size*overlap):size(input, 1) % size(input,1) is the number of rows (samples) of the input signal.
         if i < size(input, 1) - frame_size
-            framesl = [framesl; input(i:i+frame_size-1,1)']; % Because of the 50% overlap, we go from i till i+ 2*frame_size-1 so we get 2*frame_size values
+            framesl = [framesl; input(i:i+frame_size-1,1)']; % Because of the 50% overlap, we go from i till i+2*frame_size-1 so we get 2*frame_size values
             framesr = [framesr; input(i:i+frame_size-1,2)'];
         else
-            % add zeros to incomplete frames to match them up with complete
-            % frames.
+            % Add zeros to incomplete frames to match them up with complete frames.
             add_zeros = frame_size - size(input(i:end,1),1); 
             framesl = [framesl; [input(i:end,1)', zeros([1, add_zeros])]];
             framesr = [framesr; [input(i:end,1)', zeros([1, add_zeros])]];
