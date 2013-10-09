@@ -6,14 +6,15 @@ function [ timeshifted_signal ] = timeshift_OLA(filename, sample_rate, overlap, 
     %               'C:\annelies1.wav'.
     % sample_rate   E.g. 44100, which means that 44100 samples represent 1
     %               second.
-    % overlap       A value in (0,1). 0.5 for example means that when the input
-    %               signal is broken into frames, they will overlap for 50%.
+    % overlap       A value in (0,1). 0.2 for example means that when the input
+    %               signal is broken into frames, they will overlap for 20%.
     % fps           Frames per second. Determines in how many frames the
     %               input signal will be chopped and how long the frames will be.
     %               E.g. 10.
     % alpha         A value in (0,2) that determines the amount of time
     %               stretching. alpha in (0,1) speeds up the signal, alpha
-    %               in (1,2) slows it down.
+    %               in (1,2) slows it down. Alpha must be smaller than 1/(1-overlap),
+    %               (else there would be gaps in the output signal.)
 
     
     
@@ -38,8 +39,9 @@ function [ timeshifted_signal ] = timeshift_OLA(filename, sample_rate, overlap, 
     % player = audioplayer(input, sample_rate);  %player element, easy to play/pause sound
     
     % Chop the input signals into overlapping frames.
-    frames_left = make_frames(input_left, sample_rate, fps, overlap);
-    frames_right = make_frames(input_right, sample_rate, fps, overlap);
+    % framesl/framesr have dimensions num_frames:frame_size
+    frames_left = make_frames(input_left, sample_rate, overlap, fps);
+    frames_right = make_frames(input_right, sample_rate, overlap, fps);
     frame_size = size(frames_left, 2);
 
 
@@ -48,10 +50,16 @@ function [ timeshifted_signal ] = timeshift_OLA(filename, sample_rate, overlap, 
     % This will be our eventual output signal.
     % It's dimensions during construction will be 2xn.
     % We already put in the first frame.
+    % (To cut some more milliseconds from execution time, this matrix should
+    %  be preallocated with zeros.)
     timeshifted_signal = [frames_left(1,:); frames_right(1,:)];
     % After 'time_shift' samples in the output signal, a new frame begins.
     % 'Ss' in the assignment document.
-    time_shift = round(alpha * frame_size*overlap);
+    % (1-overlap) gives 0.8 for an overlap of e.g. 0.2
+    % For there to be no gaps in the output signal, time_shift should be smaller than frame_size,
+    % or: alpha * frame_size * (1-overlap) < frame_size
+    % or: alpha < 1 / (1-overlap)
+    time_shift = round(alpha * frame_size * (1-overlap));
     % Add all remaining frames one by one to the output signal.
     for i = 2:size(frames_left,1)
         % Select i'th row in framesl/framer = i'th frame.
