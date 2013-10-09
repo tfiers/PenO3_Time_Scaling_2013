@@ -16,18 +16,25 @@ function frames = make_frames(input, sample_rate, fps, overlap)
         overlap = 0.5;
     end
 
-    % Break into pieces.
-    frame_size = floor(sample_rate / fps); % FT is faster with powers of 2. ML function "nextPowersOf2"
-    time_shift = floor(frame_size * overlap); % Sa in the assignment document.
-                                              % Samples between each new
-                                              % frame.
+    % Number of samples in one frame.
+    frame_size = floor(sample_rate / fps); % FFT is faster with powers of 2. 
+                                           % There's a ML function like "nextPowerOf2"
+    % Sa in the assignment document.
+    % Samples between each new frame.
+    time_shift = floor(frame_size * overlap);
+    % Number of frames we will make. Number of rows in the output matrix.
     num_frames = floor(size(input, 1) / time_shift);
-    frames = zeros(num_frames, frame_size); % This is the eventual output.
-                                            % Preallocate this large array for speed.
-    % Populate all now-zero rows of frames.
+    % This is the eventual output.
+    % Preallocate this large (with zeros) array for speed.
+    frames = zeros(num_frames, frame_size); 
+    % Populate the output matrix 'frames' row by row (which are currently all zeros).
     for frame_number = 1:num_frames
-        offset_from_start = (frame_number-1)*time_shift+1; % -1 +1 to start with input(1:...)
-        if offset_from_start+frame_size-1 < size(input, 1)
+        % The sample in the input signal where our next frame starts.
+        % We do -1 +1 to start with input(1:...)
+        % So for a time_shift of 4410, we'll get 1, 4411, 8821, ...
+        offset_from_start = (frame_number-1)*time_shift+1;
+        % Check whether there are enough samples left in the input signal to fill a whole frame.
+        if offset_from_start+frame_size <= size(input, 1)
             % Overwrite zeros in new row with next frame.
             frames(frame_number, :) = input(offset_from_start:offset_from_start+frame_size-1, 1);
         else
