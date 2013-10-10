@@ -1,60 +1,92 @@
-function [ timeshifted_signal ] = timeshift_OLA(filename, sample_rate, alpha, fps, overlap)
-% Speeds up/slows down audio with Overlap and Add (OLA).
+function timeshifted_signal = timeshift_OLA_crossfade(filename, sample_rate, overlap, fps, alpha)
+    % Speeds up/slows down audio with Overlap and Add (OLA), crossfading overlapping frames.
     
-    % filename A string giving the absolute or relative path of a .wav
-    % file. E.g. 'Speech Materials\annelies1.wav' or
-    % 'C:\annelies1.wav'.
-    % sample_rate E.g. 44100, which means that 44100 samples represent 1
-    % second.
-    % alpha A value in (0,2) that determines the amount of time
-    % stretching. alpha in (0,1) speeds up the signal, alpha
-    % in (1,2) slows it down.
-    % fps Frames per second. Determines in how many frames the
-    % input signal will be chopped and how long they will be.
-    % overlap A value in (0,1). E.g. 0.5 means the frames will be
-    % overlapped for 50%.
-    
+    % filename      A string giving the absolute or relative path of a .wav
+    %               file. E.g. 'Speech Materials\annelies1.wav' or
+    %               'C:\annelies1.wav'.
+    % sample_rate   E.g. 44100, which means that 44100 samples represent 1
+    %               second.
+    % overlap       A value in (0,1). 0.2 for example means that when the input
+    %               signal is broken into frames, they will overlap for 20%.
+    % fps           Frames per second. Determines in how many frames the
+    %               input signal will be chopped and how long the frames will be.
+    %               E.g. 10.
+    % alpha         A value in (0,2) that determines the amount of time
+    %               stretching. alpha in (0,1) speeds up the signal, alpha
+    %               in (1,2) slows it down. Alpha must be smaller than 1/(1-overlap),
+    %               (else there would be gaps in the output signal.)
+    %               (See in code, at definiton of 'time_shift' for explanation.)
+
     
     tic % For measuring how long this function took to complete.
-
-    input = audioread(filename); % load wav-file
     
+    % Provide default argument values.
+    if nargin == 0 % Number of arguments in.
+        filename = 'Speech Materials\goedele1.wav';
+        sample_rate = 44100;
+        overlap = 0.5;
+        alpha = 1.5;
+        fps = 10;
+    end
+
+    input = audioread(filename); % Load audio file.
+    input_left = input(:, 1); % Split channels (for stereo audio)
+    input_right = input(:, 2); % We assume the input is nx2.
+    % It could be that the left signal is in the second row, of course.
+    
+    % (For later reference:)
     % Y = resample(input, 2, 1); % resample at half the speed
-    % player = audioplayer(input, sample_rate); %player element, easy to play/pause sound
+    % player = audioplayer(input, sample_rate);  %player element, easy to play/pause sound
     
-    % Break into pieces.
-    frame_size = round(sample_rate / fps);
-    framesl = [];
-    framesr = [];
-    for i = 1:round(frame_size*overlap):size(input, 1) % size(input,1) is the number of rows (samples) of the input signal.
-        if i < size(input, 1) - frame_size
-            framesl = [framesl; input(i:i+frame_size-1,1)']; % Because of the 50% overlap, we go from i till i+2*frame_size-1 so we get 2*frame_size values
-            framesr = [framesr; input(i:i+frame_size-1,2)'];
-        else
-            % Add zeros to incomplete frames to match them up with complete frames.
-            add_zeros = frame_size - size(input(i:end,1),1);
-            framesl = [framesl; [input(i:end,1)', zeros([1, add_zeros])]];
-            framesr = [framesr; [input(i:end,1)', zeros([1, add_zeros])]];
-        end
-    end
-    
-    % framesl and framesr contain an amount of rows equal to the total amount of frames and an amount of columns equal to the frame size
+    % Chop the input signals into overlapping frames.
+    % framesl/framesr have dimensions num_frames:frame_size
+    frames_left = make_frames(input_left, sample_rate, overlap, fps);
+    frames_right = make_frames(input_right, sample_rate, overlap, fps);
+    frame_size = size(frames_left, 2);
 
-    % Recombining frames taking into consideration time shift.
-    timeshifted_signal = [framesl(1,:); framesr(1,:)]; % We put the first frame in the output signal
-    %%%ALPHA = 1.5; % Changing alpha will change the amount of overlap and thus the speed.
-    time_shift = round(alpha * frame_size*overlap); % Hoeveel samples er tussen elk nieuw frame in het outputsignaal zitten. Ss
-    for i = 2:size(framesl,1)
-        framel = framesl(i,:); % Select i'th row.
-        framer = framesr(i,:); % Select i'th row.
-        index1 = (i-1) * time_shift; % Index 1 is the index in output of the i'th frame where its overlap starts with its previous frame.
-        index2 = size(timeshifted_signal, 2); % Index 2 is the index of the last sample with overlap of the i'th frame and thus the length of the output so far.
-        length_overlap = index2 - index1 + 1; % the sample at index1 itself is also overlapping, thus + 1
-        fade_out = linspace(0,1,length_overlap);
-        fade_in = linspace(1,0,length_overlap);
-        timeshifted_signal(1:2, index1:index2) = timeshifted_signal(1:2, index1:index2).*fade_out + [framel(1:length_overlap);framer(1:length_overlap)].*fade_in ; % Summing up the overlapping parts.
-        timeshifted_signal = [timeshifted_signal, [framel(length_overlap+1:size(framel, 2)); framer(length_overlap+1:size(framer, 2))]]; % Adding the non-overlapping elements of the following frame to the output.
+
+    % Recombine frames with a time shift.
+
+    % This will be our eventual output signal.
+    % It's dimensions during construction will be 2xn.
+    % We already put in the first frame.
+    % (To cut some more milliseconds from execution time, this matrix should
+    %  be preallocated with zeros.)
+    timeshifted_signal = [frames_left(1,:); frames_right(1,:)];
+    % After 'time_shift' samples in the output signal, a new frame begins.
+    % 'Ss' in the assignment document.
+    % (1-overlap) gives 0.8 for an overlap of e.g. 0.2
+    % For there to be no gaps in the output signal, time_shift should be smaller than frame_size,
+    % or: alpha * frame_size * (1-overlap) < frame_size
+    % or: alpha < 1 / (1-overlap)
+    time_shift = round(alpha * frame_size * (1-overlap));
+    % Add all remaining frames one by one to the output signal.
+    for i = 2:size(frames_left,1)
+        % Select i'th row in framesl/framer = i'th frame.
+        framel = frames_left(i,:);
+        framer = frames_right(i,:);
+        % 'index1' is the index in the output signal where the overlap with the next-to-be-added frame (framel/framer) starts.
+        index1  = (i-1) * time_shift;
+        % 'index2' is the index of the last sample in the output singal, where the overlap stops of course.
+        index2 = size(timeshifted_signal, 2);
+        % The sample at index1 itself is also overlapping, thus + 1
+        length_overlap = index2 - index1 + 1;
+
+        % Generate a vector linearly decreasing from 1 to 0.
+        fade_out = linspace(1, 0, length_overlap);
+        % Generate a vector linearly increasing from 0 to 1.
+        fade_in = linspace(0, 1, length_overlap);
+        % Sum up the overlapping samples of the output signal and the new frames, 
+        % weighted by respectively the fade_in and fade_out vectors.
+        timeshifted_signal(1:2, index1:index2) = timeshifted_signal(1:2, index1:index2) .* [fade_out; fade_out] ...
+                                                 + [framel(1:length_overlap); framer(1:length_overlap)] .* [fade_in; fade_in];
+
+        % Add the rest of the samples of framel/framer to the output (those samples do not overlap). 
+        timeshifted_signal = [timeshifted_signal, [framel(length_overlap+1:end); framer(length_overlap+1:end)]];
     end
-    timeshifted_signal = timeshifted_signal'; %transpose
+
+    % Transpose output signal to match dimensions of input signal.
+    timeshifted_signal = timeshifted_signal';
+
     toc
 end

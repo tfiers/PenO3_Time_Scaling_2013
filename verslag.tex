@@ -1,15 +1,90 @@
-\documentclass[10pt]{report}
+\documentclass[12pt]{report}
 \begin{document}
-Steengoede tekst.
-kleine edit! :)
-\begin{table}[h]
-	\centering
-	\caption{Kei vette tabel.}
-	\label{tb:table}
-	\begin{tabular}{crl}
-		Dit & is & een \\
-		kei & vette & tabel \\
-		! & ! & ! \\
-	\end{tabular}
-\end{table}
+
+
+\title{{\Huge \textbf{Time Scaling}}}
+\date{24 oktober 2013}
+\author{AUTEURS........}
+\maketitle
+
+\tableofcontents
+%Contents veranderen in "Inhoudstafel"
+
+\chapter{Inleiding}
+%Hier komt de inleiding.
+Soms wil men dat geluid sneller of trager gaat dan dat hij opgenomen is. Dit heeft tal van toepassingen, zoals bij het presenteren van het nieuws. De nieuwsanker moet veel informatie geven binnen een bepaalde tijdsspanne. Het kan dus nuttig zijn om te snel gesproken geluid in te korten en te traag gesproken geluid te versnellen. Deze techniek wordt eveneens toegepast bij live muzikale optredens, of bij de omzetting van video (25 of 30 fps) naar cinema(24 fps), zodat de soundtrack intact blijft. Dit gebeurt ook wanneer het geluid bij een beeld moet gezet worden, wanneer ze niet samen zijn opgenomen. Een andere toepassing is om teksten die in een normaal tempo zijn voorgelezen, te versnellen zodat blinden, die een verscherpt gehoor hebben ook boeken kunnen 'lezen'. Het omgekeerde gebeurt voor mensen die een vreemde taal leren. [1],[2]
+\textbf{verwijzingen nog toevoegen.}\\
+
+Door het geluid via sample rate conversie sneller of trager te laten afspelen, zal het veel hoger of lager gaan klinken. Via ‘time scaling’ of ‘time stretching’ kan met een audio-signal versnellen of vertragen zonder dat er een verschil in toonhoogte is. Time-scaling kan op verschillende manieren gebeuren. Algemeen worden de algoritmes opgedeeld in drie verschillende categorie\"{e}n: Time domain, Phase-vocoder en signal models. [1]. In dit verslag wordt enkel time doomain algoritmes besproken, meer bepaald OLA, SOLA en PSOLA. Het basisidee  van dit algoritme is eerst het splitsen in overlappende frames van het signaal. Daarna gebeurt het terug combineren van deze frames om een output signaal te geven. Daarna worden deze algoritmes verder aangepast, zodat de time scaling ook in real time kan gebeuren. 
+
+\chapter{Time Stretching Algoritmes}
+%Chapter vernederlandsen.
+\section{Introductie}
+Hoofdstuk 2 beschrijft de verschillende algoritmes voor het versnellen en vertragen van geluidsbestanden. Het hoofdstuk begint met het beschrijven van de Sample Rate Change, een slechte methode, en gaat verder met de OLA-methode (\textit{Overlap and Add}), het eenvoudigste algoritme. Vervolgens beschrijft deze tekst het SOLA-algoritme (\textit{Synchronous Overlap and Add}), wat een verbetering inhoudt van het OLA-principe. 
+\textbf{VERDER AANVULLEN}
+
+\section{Sample Rate Change}
+Zoals reeds beschreven in de inleiding, is een na\"{i}eve benadering van time scaling het geluidssignaal simpelweg te vertragen of te versnellen. Deze methode kan beschreven worden als de \textit{sample rate conversie}. Het versnelt of vertraagt het audiosignaal door het uit te rekken of in te krimpen. Dit is echter geen goede methode; het uitgangssignaal wordt volledig vervormd en stemmen zullen niet meer natuurlijk klinken. De voornaamste reden hiervoor is dat sample rate conversie geen rekening houdt met de \textit{toonhoogte} of de \textit{pitch}. De toonhoogte is de belangrijkste frequentie die de gebruiker ervaart als deen is de ervaren die    \\
+\\
+
+\section{Overlap and Add (OLA)}
+Hier OLA
+
+\section{Synchronous Overlap and Add(SOLA)}
+
+\subsection{Concept}
+SOLA en OLA komen sterk overeen, maar het grote verschil is dat bij SOLA gebruikt maakt van correlatie technieken. Dit zorgt voor  minder ruis in de geluidsfragmenten. Na de verschuiving van de blokken met de tijdsfactor $\alpha$, zoekt het algoritme naar maximale gelijkenissen in het overlappingsgebied. Het algoritme verschuift dan de blokken zodat deze overlappingen samenvallen. Het algoritme telt dan de uiteindelijk overlappingen weer op, zoals in het OLA-algoritme. In SOLA.m gebeurt dit met/zonder het fade-in en fade-out effect.
+\textbf{bestandsnaam aanpassen, is het uiteindelijke met fade in en fade out of niet?}
+
+\subsection{Uitwerking}
+De cross-correlatie is een manier om gelijkenissen tussen twee geluidsgolven te bepalen. Het is een veelgebruike manier bij signaalverwerking om kleinere geluidsgolven in een langer sample te vinden, wat leidt tot patroonherkenning. 
+De cross-correlatie leidt hier tot het vinden van de plats met maximale overeenkomst tussen de  overlappende intervallen van het verschoven signaal. 
+De cross-correlatie is gegeven door :
+\begin{center}
+$r_{•xL1}r_{•xL2}=x_{•L1}(n)x_{•L2}(n+m) ,0        \le m <L$
+\end{center}
+met $x_{•L1}(n)$ en $x_{•L2}(n+m)$ de delen van $x_{•1}$ en $(n)x_{•2}(n)$ in het overlappende interval met lengte L. De index van het overlappende maximum  is een manier om de signalen te laten overlappen
+
+
+\textbf{Nog aanvullen wanneer programma af is.}
+
+\subsection{Interpretatie}
+
+\chapter{Real-time implementatie}
+
+\chapter{Tijdelijke Commentaar}
+
+\section{Informele inhoudstafel}
+Wat moet er zeker in het verslag?
+\begin{enumerate}
+\item Inleiding
+\begin{itemize}
+\item Situering van het probleem in context
+\item (Verband met literatuur/evt. vorige studies)
+\item Heel kort opsommen van voornaamste besluiten
+\item Structuur/opbouw van het verslag duiden
+\end{itemize}
+\item Middenstuk
+\begin{itemize}
+\item Sample Rate change
+\item Time Stretching Algorithms: OLA, SOLA, PSOLA, Pitch Detection
+\begin{enumerate}
+\item \textbf{Concept:} uitleg algemeen principe (conceptueel schetsen)
+\item \textbf{Uitwerking:} code in MATLAB + duiding (specifieke uitleg)
+\item \textbf{Interpretatie:} reflectie/interpretatie/besluit: is dit een goed algoritme of niet? Waarom wel/niet? Wat kan beter?
+\end{enumerate}
+\item Real-time implementatie/Simulink
+\end{itemize}
+\item Slot
+\begin{itemize}
+\item Integratie andere vakken
+\item Reflectie planning
+\item Conclusie
+\end{itemize}
+\item Referentielijst
+\item Bijlages
+\end{enumerate}
+
+
+
 \end{document}
