@@ -15,9 +15,9 @@
 Soms wil men dat geluid sneller of trager gaat dan dat hij opgenomen is. Dit heeft tal van toepassingen, zoals bij het presenteren van het nieuws. De nieuwsanker moet veel informatie geven binnen een bepaalde tijdsspanne. Het kan dus nuttig zijn om te snel gesproken geluid in te korten en te traag gesproken geluid te versnellen. Deze techniek wordt eveneens toegepast bij live muzikale optredens, of bij de omzetting van video (25 of 30 fps) naar cinema(24 fps), zodat de soundtrack intact blijft. Dit gebeurt ook wanneer het geluid bij een beeld moet gezet worden, wanneer ze niet samen zijn opgenomen. Een andere toepassing is om teksten die in een normaal tempo zijn voorgelezen, te versnellen zodat blinden, die een verscherpt gehoor hebben ook boeken kunnen 'lezen'. Het omgekeerde gebeurt voor mensen die een vreemde taal leren. [1],[2]
 \textbf{verwijzingen nog toevoegen.}\\
 
-Door het geluid via sample rate conversie sneller of trager te laten afspelen, zal het veel hoger of lager gaan klinken. Via ‘time scaling’ of ‘time stretching’ kan met een audio-signal versnellen of vertragen zonder dat er een verschil in toonhoogte is. Time-scaling kan op verschillende manieren gebeuren. Algemeen worden de algoritmes opgedeeld in drie verschillende categorieën: Time domain, Phase-vocoder en signal models. [1]. In dit verslag wordt enkel time doomain algoritmes besproken, meer bepaald OLA, SOLA en PSOLA. Het basisidee  van dit algoritme is eerst het splitsen in overlappende frames van het signaal. Daarna gebeurt het terug combineren van deze frames om een output signaal te geven. Daarna worden deze algoritmes verder aangepast, zodat de time scaling ook in real time kan gebeuren. 
+Door het geluid via sample rate conversie sneller of trager te laten afspelen, zal het veel hoger of lager gaan klinken. Via ‘time scaling’ of ‘time stretching’ kan met een audio-signal versnellen of vertragen zonder dat er een verschil in toonhoogte is. Time-scaling kan op verschillende manieren gebeuren. Algemeen worden de algoritmes opgedeeld in drie verschillende categorie\"{e}n: Time domain, Phase-vocoder en signal models. [1]. In dit verslag wordt enkel time doomain algoritmes besproken, meer bepaald OLA, SOLA en PSOLA. Het basisidee  van dit algoritme is eerst het splitsen in overlappende frames van het signaal. Daarna gebeurt het terug combineren van deze frames om een output signaal te geven. Daarna worden deze algoritmes verder aangepast, zodat de time scaling ook in real time kan gebeuren. 
 
-\chapter{Time Stretching Algoritmes (Tijdsdomein)}
+\chapter{Time Stretching Algoritmes}
 %Chapter vernederlandsen.
 \section{Introductie}
 Hoofdstuk 2 beschrijft de verschillende algoritmes voor het versnellen en vertragen van geluidsbestanden. Het hoofdstuk begint met het beschrijven van de Sample Rate Change, een slechte methode, en gaat verder met de OLA-methode (\textit{Overlap and Add}), het eenvoudigste algoritme. Vervolgens beschrijft deze tekst het SOLA-algoritme (\textit{Synchronous Overlap and Add}), wat een verbetering inhoudt van het OLA-principe. 
@@ -32,7 +32,7 @@ Hier OLA
 
 \section{Synchronous Overlap and Add(SOLA)}
 
-\subsection{Algemeen principe}
+\subsection{Concept}
 SOLA en OLA komen sterk overeen, maar het grote verschil is dat bij SOLA gebruikt maakt van correlatie technieken. Dit zorgt voor  minder ruis in de geluidsfragmenten. Na de verschuiving van de blokken met de tijdsfactor $\alpha$, zoekt het algoritme naar maximale gelijkenissen in het overlappingsgebied. Het algoritme verschuift dan de blokken zodat deze overlappingen samenvallen. Het algoritme telt dan de uiteindelijk overlappingen weer op, zoals in het OLA-algoritme. In SOLA.m gebeurt dit met/zonder het fade-in en fade-out effect.
 \textbf{bestandsnaam aanpassen, is het uiteindelijke met fade in en fade out of niet?}
 
@@ -69,7 +69,7 @@ Wat moet er zeker in het verslag?
 \item Sample Rate change
 \item Time Stretching Algorithms: OLA, SOLA, PSOLA, Pitch Detection
 \begin{enumerate}
-\item \textbf{Algemeen principe:} uitleg algemeen principe (conceptueel schetsen)
+\item \textbf{Concept:} uitleg algemeen principe (conceptueel schetsen)
 \item \textbf{Uitwerking:} code in MATLAB + duiding (specifieke uitleg)
 \item \textbf{Interpretatie:} reflectie/interpretatie/besluit: is dit een goed algoritme of niet? Waarom wel/niet? Wat kan beter?
 \end{enumerate}
