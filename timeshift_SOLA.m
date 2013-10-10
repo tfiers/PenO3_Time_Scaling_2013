@@ -1,64 +1,130 @@
-function [ timeshifted_signal ] = timeshift_SOLA(filename, sample_rate, alpha, fps, overlap)
-    tic
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
-    % Speeds up/slows down audio with Overlap and Add (OLA).
-    input = audioread(filename); % load wav-file
-    %,Y = resample(input, 2, 1); % resample at half the speed
-    %SAMPLING_RATE = 44100; % this sample rate equals 1 second
-    % player = audioplayer(input, sample_rate);  %player element, easy to play/pause sound
-    % Break into pieces.
-    framesl = [];
-    framesr = [];
-    frame_size = round(sample_rate / fps);
-    for i = 1:round(frame_size*overlap):size(input, 1) % Size(input,1) is the number of rows of the input signal.
-        if i < size(input, 1) - frame_size
-            framesl = [framesl; input(i:i+frame_size-1,1)']; % Because of the 50% overlap, we go from i till i+ 2*frame_size-1 so we get 2*frame_size values
-            framesr = [framesr; input(i:i+frame_size-1,2)'];
-        else
-            % add zeros to incomplete frames to match them up with complete
-            % frames.
-            add_zeros = frame_size - size(input(i:end,1),1); 
-            framesl = [framesl; [input(i:end,1)', zeros([1, add_zeros])]];
-            framesr = [framesr; [input(i:end,1)', zeros([1, add_zeros])]];
-        end
-    end
+function timeshifted_signal = timeshift_SOLA_crossfade(filename, sample_rate, overlap, fps, alpha)
+    % Speeds up/slows down audio with Synchronisation, Overlap and Add (SOLA) (with crossfade).
     
-    % framesl and framesr contain an amount of rows equal to the total amount of frames and an amount of columns equal to the frame size      
+    % filename      A string giving the absolute or relative path of a .wav
+    %               file. E.g. 'Speech Materials\annelies1.wav' or
+    %               'C:\annelies1.wav'.
+    % sample_rate   E.g. 44100, which means that 44100 samples represent 1
+    %               second.
+    % overlap       A value in (0,1). 0.2 for example means that when the input
+    %               signal is broken into frames, they will overlap for 20%.
+    % fps           Frames per second. Determines in how many frames the
+    %               input signal will be chopped and how long the frames will be.
+    %               E.g. 10.
+    % alpha         A value in (0,2) that determines the amount of time
+    %               stretching. alpha in (0,1) speeds up the signal, alpha
+    %               in (1,2) slows it down. Alpha must be smaller than 1/(1-overlap),
+    %               (else there would be gaps in the output signal.)
+    %               (See in code, at definiton of 'time_shift' for explanation.)
 
-    % Recombining frames taking into consideration time shift.
-    timeshifted_signal = [framesl(1,:); framesr(1,:)]; % We put the first frame in the output signal
-    %%%ALPHA = 1.5; % Changing alpha will change the amount of overlap and thus the speed.
-    time_shift = round(alpha * frame_size*overlap); % Hoeveel samples er tussen elk nieuw frame in het outputsignaal zitten. Ss
-    for i = 2:size(framesl,1)
-        framel = framesl(i,:); % Select i'th row.
-        framer = framesr(i,:); % Select i'th row.
-        index1  = (i-1) * time_shift; % Index 1 is the index in output of the i'th frame where its overlap starts with its previous frame. 
-        index2 = size(timeshifted_signal, 2); % Index 2 is the index of the last sample with overlap of the i'th frame and thus the length of the output so far.
-        length_overlap = index2 - index1 + 1; % the sample at index1 itself is also overlapping, thus + 1
-        
+    
+    tic % For measuring how long this function took to complete.
+    
+    % Provide default argument values.
+    if nargin == 0 % Number of arguments in.
+        filename = 'Speech Materials\goedele1.wav';
+        sample_rate = 44100;
+        overlap = 0.5;
+        fps = 10;
+        alpha = 1.5;
+    end
+
+    input = audioread(filename); % Load audio file.
+    input_left = input(:, 1); % Split channels (for stereo audio)
+    input_right = input(:, 2); % We assume the input is nx2.
+    % It could be that the left signal is in the second row, of course.
+    
+    % (For later reference:)
+    % Y = resample(input, 2, 1); % resample at half the speed
+    % player = audioplayer(input, sample_rate);  %player element, easy to play/pause sound
+    
+    % Chop the input signals into overlapping frames.
+    % framesl/framesr have dimensions num_frames:frame_size
+    frames_left = make_frames(input_left, sample_rate, overlap, fps);
+    frames_right = make_frames(input_right, sample_rate, overlap, fps);
+    frame_size = size(frames_left, 2);
+
+
+    % Recombine frames with a time shift.
+
+    % This will be our eventual output signal.
+    % It's dimensions during construction will be 2xn.
+    % We already put in the first frame.
+    % (To cut some more milliseconds from execution time, this matrix should
+    %  be preallocated with zeros.)
+    timeshifted_signal = [frames_left(1,:); frames_right(1,:)];
+    % After 'time_shift' samples in the output signal, a new frame begins.
+    % 'Ss' in the assignment document.
+    % (1-overlap) gives 0.8 for an overlap of e.g. 0.2
+    % For there to be no gaps in the output signal, time_shift should be smaller than frame_size,
+    % or: alpha * frame_size * (1-overlap) < frame_size
+    % or: alpha < 1 / (1-overlap)
+    time_shift = round(alpha * frame_size * (1-overlap));
+    % Add all remaining frames one by one to the output signal.
+    for i = 2:size(frames_left,1)
+        % Select i'th row in framesl/framer = i'th frame.
+        framel = frames_left(i,:);
+        framer = frames_right(i,:);
+        % 'index1' is the index in the output signal where the overlap with the next-to-be-added frame (framel/framer) starts.
+        index1  = (i-1) * time_shift;
+        % 'index2' is the index of the last sample in the output singal, where the overlap stops of course.
+        index2 = size(timeshifted_signal, 2);
+
         % Synchronising the existing output and the new frame.
-        correlation = [0,0]; %Correlation is the largest value of the cross-correlation function and it's index.
-        for j = (index1-74):(index1+74)% Approximately 148 data points in a 300Hz signal period. Typically, the lowest fundamental frequency of human voices is 300Hz.
-            sum = 0;% Temporary value.
-            for k = 1:(length_overlap-j-1)%Represents the sum in the cross-correlation formula.
-                sum = sum + timeshifted_signal(k, 1)* framel(1,k+j);
-            end
-            sum = sum/length_overlap;%Represents the 1/L in the correlation formula.
-            if sum > correlation(1,1) % Checks to see whether it may be a peak.
-                correlation(1,1) = sum;
-                correlation(1,2) = j;
+
+        LOWEST_HUMAN_FUNDAMENTAL_FREQUENCY = 300; % Hz.
+        % Equals half a period of the lowest fundemental of the human voice. 
+        % (147 for sampling rate of 44100)
+        maximum_offset = ceil(sample_rate / LOWEST_HUMAN_FUNDAMENTAL_FREQUENCY / 2);
+
+        % The largest found value of the correlation function...
+        max_correlation = -inf;
+        % ... and it's index.
+        max_correlation_index = 0;
+        % The length of the overlap of the new frame with the existing output signal
+        % when the correlation is maximum.
+        max_correlation_length_overlap = 0;
+
+        % Evaluate cross correlation function (eq. 1 in assignment document) for each point of the overlap.
+        % We start by shifting the new frame to the left by 'maximum_offset'
+        % 'j' is k_m in the assignment document.
+        for j = -maximum_offset:maximum_offset
+            % Index in the already constructed output signal where the cross-correlation starts.
+            index0 = index1+j;
+            % The sample at index0 itself is also overlapping, thus + 1
+            length_overlap = index2 - index0 + 1;
+            overlapping_part_of_output_signal = timeshifted_signal(1, index0:index2);
+            % (We work with the left audio siganl for correlation.)
+            overlapping_part_of_frame = framel(1, 1:length_overlap);
+            % Number saying how well the new frame (shifted by j) and the existing output signal overlap:
+            % Throughs on throughs / valleys on valleys make positive values, while
+            % valleys and througs make negative values (both proportional to amplitude).
+            correlation = sum(overlapping_part_of_output_signal .* overlapping_part_of_frame) / length_overlap;
+            % Look for the maximum correlation by comparing the current correlation value with the current maximum.
+            if correlation > max_correlation
+                max_correlation = correlation;
+                max_correlation_index = j;
+                max_correlation_length_overlap = length_overlap;
             end
         end
-        index1 = index1 + correlation(1, 2); 
-        
-        timeshifted_signal(1:2, index1:index2) = timeshifted_signal(1:2, index1:index2) + [framel(1:length_overlap);framer(1:length_overlap)] ; % Summing up the overlapping parts.
-        timeshifted_signal = [timeshifted_signal, [framel(length_overlap+1:size(framel, 2)); framer(length_overlap+1:size(framer, 2))]]; % Adding the non-overlapping elements of the following frame to the output. 
 
-        index1 = index1 - correlation(1, 2);
+        % Index in the already constructed output signal where the cross-correlation is maximum.
+        index0 = index1 + max_correlation_index;
+
+        % Generate a vector linearly decreasing from 1 to 0.
+        fade_out = linspace(1, 0, max_correlation_length_overlap);
+        % Generate a vector linearly increasing from 0 to 1.
+        fade_in = linspace(0, 1, max_correlation_length_overlap);
+        % Sum up the overlapping samples of the output signal and the new frames, 
+        % weighted by respectively the fade_in and fade_out vectors.
+        timeshifted_signal(1:2, index0:index2) = timeshifted_signal(1:2, index0:index2) .* [fade_out; fade_out] ...
+                                                 + [framel(1:max_correlation_length_overlap); framer(1:max_correlation_length_overlap)] .* [fade_in; fade_in];                                
+        % Add the rest of the samples of framel/framer to the output (those samples do not overlap). 
+        timeshifted_signal = [timeshifted_signal, [framel(max_correlation_length_overlap+1:end); framer(max_correlation_length_overlap+1:end)]];
     end
-    timeshifted_signal = timeshifted_signal'; %transpose
+
+    % Transpose output signal to match dimensions of input signal.
+    timeshifted_signal = timeshifted_signal';
+
     toc
 end
-
-

@@ -1,5 +1,5 @@
 function timeshifted_signal = timeshift_OLA_crossfade(filename, sample_rate, overlap, fps, alpha)
-    % Speeds up/slows down audio with Overlap and Add (OLA).
+    % Speeds up/slows down audio with Overlap and Add (OLA), crossfading overlapping frames.
     
     % filename      A string giving the absolute or relative path of a .wav
     %               file. E.g. 'Speech Materials\annelies1.wav' or
