@@ -1,4 +1,4 @@
-function [ timeshifted_signal ] = timeshift_OLA(filename, sample_rate, overlap, fps, alpha)
+function timeshifted_signal = timeshift_OLA(filename, sample_rate, overlap, fps, alpha)
     % Speeds up/slows down audio with Overlap and Add (OLA).
     
     % filename      A string giving the absolute or relative path of a .wav
@@ -22,7 +22,7 @@ function [ timeshifted_signal ] = timeshift_OLA(filename, sample_rate, overlap, 
     
     % Provide default argument values.
     if nargin == 0 % Number of arguments in.
-        filename = 'Speech Materials\devilder1.wav';
+        filename = 'Speech Materials\goedele1.wav';
         sample_rate = 44100;
         overlap = 0.5;
         alpha = 1.5;
