@@ -10,7 +10,7 @@ function frames = make_frames(input, sample_rate, overlap, fps)
     %               E.g. 10.
 
     % Provide default argument values.
-    if nargin == 0 % Number of arguments in.
+    if nargin == 1 % Number of arguments in.
         sample_rate = 44100;
         overlap = 0.5;
         fps = 10;
