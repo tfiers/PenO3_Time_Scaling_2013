@@ -1,4 +1,4 @@
-function timeshifted_signal = timeshift_SOLA_crossfade(filename, sample_rate, overlap, fps, alpha)
+function timeshifted_signal = timeshift_SOLA(filename, sample_rate, overlap, fps, alpha)
     % Speeds up/slows down audio with Synchronisation, Overlap and Add (SOLA) (with crossfade).
     
     % filename      A string giving the absolute or relative path of a .wav
