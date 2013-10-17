@@ -3,15 +3,11 @@
 \usepackage[dutch]{babel}
 \usepackage{graphicx}
 
-
-
 \begin{document}
 
-
 \tableofcontents
-%Contents veranderen in "Inhoudstafel"
 
-\chapter{Inleiding}
+\chapter*{Inleiding}
 
 Wanneer geluid wordt opgenomen is het soms handig om de opname te versnellen of te vertragen. Dit heeft tal van toepassingen, zoals bij het presenteren van het nieuws of bij het ‘beatmatchen’ van muzieknummers voor een dj. Een nieuwsanker moet veel informatie geven binnen een bepaalde tijdsspanne en af en toe gaat dit ten koste van de verstaanbaarheid. Het kan dus nuttig zijn om te snelle spraak te vertragen en te trage spraak te versnellen. Deze techniek wordt eveneens toegepast bij live muzikale optredens om de maat te spelen, 
 %of bij de omzetting van video (25 of 30 fps) naar cinema(24 fps), zodat de soundtrack intact blijft. 
@@ -20,8 +16,7 @@ Dit gebeurt ook wanneer het geluid bij een beeld moet gezet worden, wanneer ze n
 
 Door het geluid via \textit{sample rate conversie} sneller of trager te laten afspelen, zal de toon hoger of lager gaan klinken. Via \textit{time scaling} of \textit{time stretching} kan men een audiosignaal versnellen of vertragen zonder dat er een verschil in toonhoogte is. Time-scaling kan op verschillende manieren gebeuren. Algemeen worden de algoritmes opgedeeld in drie verschillende categorie\"{e}n: Time domain, Phase-vocoder en signal models. [1]. In dit verslag wordt enkel tijdsdomein algoritmes besproken, meer bepaald OLA (\textit{Overlap and Add}), SOLA (\textit{Synchronous Overlap and Add}) en PSOLA (\textit{Pitch-Synchronous Overlap and Add}). Het basisidee  van dit algoritme is eerst het splitsen in overlappende frames van het signaal en het daarna hercombineren van deze frames met telkens een bepaalde overlap om een output signaal te geven. Ten slotte worden deze algoritmes verder aangepast, zodat de time scaling ook in real time kan gebeuren.
 
-\chapter{Time Stretching Algoritmes}
-%Chapter vernederlandsen.
+\chapter*{Time Stretching Algoritmes}
 
 \section{Introductie}
 Hoofdstuk 2 beschrijft de verschillende algoritmes voor het versnellen en vertragen van geluidsbestanden. Het hoofdstuk begint met het beschrijven van de \textit{sample rate conversion}, een slechte methode, en gaat verder met de OLA-methode (\textit{Overlap and Add}), het eenvoudigste algoritme. Vervolgens beschrijft deze tekst het SOLA-algoritme (\textit{Synchronous Overlap and Add}), wat het OLA-principe verbetert door de maximaal overeenkomende overlap te zoeken tussen de opeenvolgende frames.
@@ -38,7 +33,6 @@ Methodes als OLA, SOLA en PSOLA veranderen de snelheid van de geluidssignalen zo
 \section{Overlap and Add (OLA)}
 
 \subsection{Concept}
-
 Een zeer eenvoudig algoritme voor time stretching is het geluidssignaal te verdelen in overlappende deeltjes van een vaste lengte N. Deze originele fragmenten worden opgeschoven met een tijdsverschuiving van $ S_{a}$ samples. Vervolgens  \textbf{WORDEN}  de blokjes gepositioneerd met een tijdsverschuiving van $S_{s}$ = $\alpha$.$S_{a}$, waarbij $\alpha$ een variabele is die vrij gekozen mag worden \textbf{(OF BINNEN EEN BEPAALD INTERVAL?)} … Kleine delen van de opeenvolgende fragmenten overlappen hierdoor en op dit overlappend blok \textbf{WORDT} een fade-in en fade-out functie ge\"{i}mplementeerd \textbf{(AND SUMMED SAMPLE-BY-SAMPLE?)}.
 
 \textbf{FIGUUR MOET NOG GEHERPOSITIONEERD WORDEN}
@@ -74,13 +68,8 @@ De preallocatie van de outputlijst zorgt ervoor dat dit algoritme (15sec --> 0,3
 
 \paragraph{Fade-in en fade-out:}
 
-
-
-\subsection{Interpretatie}
-
 \section{Synchronous Overlap and Add (SOLA)}
 \label{sec:SOLA}
-
 
 \subsection{Concept}
 SOLA en OLA vertonen sterke gelijkenissen, maar het grote verschil is dat SOLA gebruikt maakt van kruiscorrelatie technieken. Dit zorgt voor minder ruis in de geluidsfragmenten.
@@ -112,39 +101,34 @@ overlapping_part_of_frame) / length_overlap;
 Als dit getal groter is dan \verb|max_correlation|, de maximale waarde tot nu toe  vervangen door de nieuwe maximale waarde, dan wordt de corresponderende \verb|max_correlation_index| ook vervangen.
 Zo wordt de grootste waarde voor de kruiscorrelatie bepaald, alsook op welke positie van overlapping dit gebeurd. De twee delen worden dan zo verschuiven zodat het tweede stukje begint op de index van \verb|max_correlation_index|. De frames worden opgeteld met een kruisfade en dit wordt herhaald voor alle frames. Dit wordt ook grafisch weergegeven in \textbf{grafiek???}
 
+\section{PSOLA}
+\subsection{Pitch detecite met auto-correlatie}
 
-\subsection{Interpretatie}
-
-%Pitch detectie met auto-correlatie
 Een meer robuuste manier om pitch detectie uit te voeren is door gebruik te maken van de autocorrelatie van een signaal. De autocorrelatie is gelijkend op de kruiscorrelatie in (?? verwijzing), maar bij de autocorrelatie wordt het algoritme toegepast op hetzelfde signaal. 
 Een venster van twee maal de lengte van de langste periode wordt  gebruikt om accuraat de pitch te bepalen. Als de shift in de auto-correlatie functie de fundamentele frequentie, bereikt de autocorrelatie een maximum. Dit maximum kan beschouwd worden als de pitch periode. Zo is het mogelijk om de pitch periode te bepalen van het signaal. 
 
 %Code bekijken en verder aanvullen
 
 %Vergelijking moet nog uitgeschreven worden 
-
-
-%Real-time Implementatie
-In het implementeren van de voorgaande algoritmes werd steeds gebruikt gemaakt van reeds opgenomen signalen, waarvan de karakteristieken gekend waren. In real-time-implementatie zijn de signaal karakteristieken ongekend en veranderen ze doorheen de tijd. Het signaal kan niet versneld worden omdat er niet in de toekomst kan gekeken worden en de daarna komende frames niet gekend zijn. Het signaal vertragen kan echter wel, omdat er stukjes van het gekende signaal moeten herhaald worden. Dit is de volgende stap die nog verder uitgewerkt moet worden in de volgende teamzittingen. Dit zal gebeuren in simulink. Wanneer het algoritme in simulink werkt, wordt het samengevoegd met de wim de vilder filter, die gemaakt werd door een ander team, om de ademhalingsruis eruit te halen. 
-
+\section{Vergelijking verschillende algoritmes}
+\subsection{Frequentie en signaal plots}
+\subsection{Enquete}
 
 
 
-%nog titel aanmaken, vakintegratie
+\chapter*{Real-time implementatie}
+In het implementeren van de voorgaande algoritmes werd steeds gebruikt gemaakt van reeds opgenomen signalen, waarvan de karakteristieken gekend waren. In real-time-implementatie zijn de signaal karakteristieken ongekend en veranderen ze doorheen de tijd. Het signaal kan niet versneld worden omdat er niet in de toekomst kan gekeken worden en de daarna komende frames niet gekend zijn. Het signaal vertragen kan echter wel, omdat er stukjes van het gekende signaal moeten herhaald worden. Dit is de volgende stap die nog verder uitgewerkt moet worden in de volgende teamzittingen. Dit zal gebeuren in simulink. Wanneer het algoritme in simulink werkt, wordt het samengevoegd met de wim de vilder filter, die gemaakt werd door een ander team, om de ademhalingsruis eruit te halen.
 
-Bij dit project wordt de kennis uit verschillende vakken toegepast. Het project werkt met geluid. Een matrix stelt het geluid voor. Bewerkingen op matrices werd aangeleerd in het vak toegpaste algebra. Het frequentiespectrum kan berekend worden door een fourier transformatie. Dit werd gezien in het vak Informatie-Overdracht en Verwerking en in Elektrische Netwerken. Het schrijven van de algoritmes in Matlab vergt kennis opgedaan uit het vak methodiek van de informatica. In de algoritmes wordt ook gebruikt gemaakt van een crosscorrelatie die werkt met een convolutie. Dit staat uitgelegd in de cursus Algebra en Analyse. Daarnaast wordt de kennis van P&O 1 en 2 toegepast in de vergaderingen. 
-
-%Algemene werkwijze
+\chapter*{Werkwijze en vakintegratie}
+\section{Werkwijze}
 
 Elke P&O zitting beginnen we met een korte vergadering. Hierin bespreken we eerst de eventuele huistaken en hoe deze verlopen zijn. Dan passen we indien nodig de  algemene planning aan en stellen we de dagplanning op met de taakverdeling. Dit gebeurt in Asana, een handige webinterface diealle projecttaken makkelijk laat inplannen. Vervolgens maken we via Instagantt een Gant-chart voor een duidelijk overzicht. 
 Als er moet geprogrammeerd worden proberen we in groepjes van twee te werken. Volgens het ‘Pair Programming’-systeem kan dan één persoon de code typen en de andere kijkt onmiddellijk na op fouten. 
+\section{Vakintegratie}
 
+Bij dit project wordt de kennis uit verschillende vakken toegepast. Het project werkt met geluid. Een matrix stelt het geluid voor. Bewerkingen op matrices werd aangeleerd in het vak toegpaste algebra. Het frequentiespectrum kan berekend worden door een fourier transformatie. Dit werd gezien in het vak Informatie-Overdracht en Verwerking en in Elektrische Netwerken. Het schrijven van de algoritmes in Matlab vergt kennis opgedaan uit het vak methodiek van de informatica. In de algoritmes wordt ook gebruikt gemaakt van een crosscorrelatie die werkt met een convolutie. Dit staat uitgelegd in de cursus Algebra en Analyse. Daarnaast wordt de kennis van P&O 1 en 2 toegepast in de vergaderingen. 
 
-\chapter{Real-time implementatie}
-
-
-
-
+\chapter*{Besluit}
 
 
 
@@ -152,7 +136,7 @@ Als er moet geprogrammeerd worden proberen we in groepjes van twee te werken. Vo
 
 
 
-\chapter{Bijlages}
+\chapter*{Bijlages}
 \section{Bijlage A}
 \label{sec:bijlageA}
 
