@@ -9,21 +9,21 @@
 
 \chapter*{Inleiding}
 
-Wanneer geluid wordt opgenomen is het soms handig om de opname te versnellen of te vertragen. Dit heeft tal van toepassingen, zoals bij het presenteren van het nieuws of bij het ‘beatmatchen’ van muzieknummers voor een dj. Een nieuwsanker moet veel informatie geven binnen een bepaalde tijdsspanne en af en toe gaat dit ten koste van de verstaanbaarheid. Het kan dus nuttig zijn om te snelle spraak te vertragen en te trage spraak te versnellen. Deze techniek wordt eveneens toegepast bij live muzikale optredens om de maat te spelen, 
-%of bij de omzetting van video (25 of 30 fps) naar cinema(24 fps), zodat de soundtrack intact blijft. 
+Wanneer geluid wordt opgenomen is het soms handig om de opname te versnellen of te vertragen. Dit heeft tal van toepassingen, zoals bij het presenteren van het nieuws of bij het ‘beatmatchen’ van muzieknummers voor een dj. Een nieuwsanker moet veel informatie geven binnen een bepaalde tijdsspanne en af en toe gaat dit ten koste van de verstaanbaarheid. Het kan dus nuttig zijn om te snelle spraak te vertragen. Deze techniek wordt eveneens toegepast bij live muzikale optredens om op de maat te spelen.
 Dit gebeurt ook wanneer het geluid bij een beeld moet gezet worden, wanneer ze niet samen zijn opgenomen. Een andere toepassing is om teksten die in een normaal tempo zijn voorgelezen te versnellen zodat blinden, die een verscherpt gehoor hebben, ook boeken kunnen 'lezen'. Het omgekeerde gebeurt voor mensen die een vreemde taal leren. [1],[2]
-\textbf{verwijzingen nog toevoegen.}\\
+%verwijzingen moeten nog toegevoegd worden. 
 
-Door het geluid via \textit{sample rate conversie} sneller of trager te laten afspelen, zal de toon hoger of lager gaan klinken. Via \textit{time scaling} of \textit{time stretching} kan men een audiosignaal versnellen of vertragen zonder dat er een verschil in toonhoogte is. Time-scaling kan op verschillende manieren gebeuren. Algemeen worden de algoritmes opgedeeld in drie verschillende categorie\"{e}n: Time domain, Phase-vocoder en signal models. [1]. In dit verslag wordt enkel tijdsdomein algoritmes besproken, meer bepaald OLA (\textit{Overlap and Add}), SOLA (\textit{Synchronous Overlap and Add}) en PSOLA (\textit{Pitch-Synchronous Overlap and Add}). Het basisidee  van dit algoritme is eerst het splitsen in overlappende frames van het signaal en het daarna hercombineren van deze frames met telkens een bepaalde overlap om een output signaal te geven. Ten slotte worden deze algoritmes verder aangepast, zodat de time scaling ook in real time kan gebeuren.
+Als het geluid sneller of trager wordt afgespeeld door het veranderen van de bemonsteringsfrequentie, zal de toon hoger of later gaan klinken. Via \textit{time scaling} of \textit{time stretching} kan men een audiosignaal versnellen of vertragen zonder dat er een verschil in toonhoogte is. Time-scaling kan op verschillende manieren gebeuren. Algemeen worden de algoritmes opgedeeld in drie verschillende categorie\"{e}n: Time domain, Phase-vocoder en signal models. [1]. In dit verslag wordt enkel tijdsdomein algoritmes besproken, meer bepaald OLA (\textit{Overlap and Add}), SOLA (\textit{Synchronous Overlap and Add}) en PSOLA (\textit{Pitch-Synchronous Overlap and Add}). Het basisidee  van dit algoritme is eerst het splitsen in overlappende frames van het signaal en het daarna hercombineren van deze frames met telkens een bepaalde overlap om een output signaal te geven. Ten slotte worden deze algoritmes verder aangepast, zodat de time scaling ook in real time kan gebeuren.
 
 \chapter*{Time Stretching Algoritmes}
 
 \section{Introductie}
-Hoofdstuk 2 beschrijft de verschillende algoritmes voor het versnellen en vertragen van geluidsbestanden. Het hoofdstuk begint met het beschrijven van de \textit{sample rate conversion}, een slechte methode, en gaat verder met de OLA-methode (\textit{Overlap and Add}), het eenvoudigste algoritme. Vervolgens beschrijft deze tekst het SOLA-algoritme (\textit{Synchronous Overlap and Add}), wat het OLA-principe verbetert door de maximaal overeenkomende overlap te zoeken tussen de opeenvolgende frames.
-\textbf{VERDER AANVULLEN}
+%Gaan we nog met hoofdstukken werken?
+Hoofdstuk 2 beschrijft de verschillende algoritmes voor het versnellen en vertragen van geluidsbestanden. Het hoofdstuk begint met het beschrijven van de \textit{sample rate conversion}, een slechte methode, en gaat verder met de OLA-methode (\textit{Overlap and Add}), het eenvoudigste algoritme. Vervolgens beschrijft deze tekst het SOLA-algoritme (\textit{Synchronous Overlap and Add}), wat het OLA-principe verbetert door de maximaal overeenkomende overlap te zoeken tussen de opeenvolgende frames. Een nog verbeterde versie van dit algoritme is het PSOLA (\textit{Pith-Synchronous Overlap and Add}), die gebruik maakt van de pith of toonhoogte van het signaal. Daarna wordt er een vergelijking gemaakt tussen deze algoritmes door het signaal te plotten en de frequentiespectra te vergelijking en deze te laten beoordelen in een enquete. 
+
 
 \section{Sample Rate Change}
-Zoals reeds beschreven in de inleiding \textbf{(IS DIT ZO?)}, is een minder goede en na\"{i}eve benadering van time scaling om het geluidssignaal simpelweg te vertragen of te versnellen. Deze methode kan beschreven worden als de \textit{sample rate conversie} en versnelt of vertraagt het audiosignaal door het uit te rekken of in te krimpen over de hele lengte van het signaal. Het uitgangssignaal wordt volledig vervormd en stemmen zullen niet langer natuurlijk klinken. De voornaamste reden hiervoor is dat sample rate conversie geen rekening houdt met de verandering van de \textit{toonhoogte} of \textit{pitch}. De toonhoogte is de frequentie die het meest bepalend is voor het geluid dat de luisteraar ervaart. Zo krijg je een vervormd uitgangssignaal dat ofwel een lagere toonhoogte krijgt wanneer het fragment vertraagd wordt, ofwel een hogere toonhoogte krijgt wanneer het fragment versneld wordt.\\
+Sample rate change is een minder goede en na\"{i}eve benadering van time scaling om het geluidssignaal simpelweg te vertragen of te versnellen. Deze methode kan beschreven worden als de \textit{sample rate conversie} en versnelt of vertraagt het audiosignaal door het uit te rekken of in te krimpen over de hele lengte van het signaal. Het uitgangssignaal wordt volledig vervormd en stemmen zullen niet langer natuurlijk klinken. De voornaamste reden hiervoor is dat sample rate conversie geen rekening houdt met de verandering van de \textit{toonhoogte} of \textit{pitch}. De toonhoogte is de frequentie die het meest bepalend is voor het geluid dat de luisteraar ervaart. Zo krijg je een vervormd uitgangssignaal dat ofwel een lagere toonhoogte krijgt wanneer het fragment vertraagd wordt, ofwel een hogere toonhoogte krijgt wanneer het fragment versneld wordt.\\
 \\
 Sample rate conversie kan eenvoudig ge\"{i}mplementeerd worden in MATLAB door gebruik te maken van de ingebouwde functie \textit{resample}. \textbf{HIER GRAFIEKJES VAN DE OPDRACHT DIE IN DE BUNDEL STAAT OM MEE AAN TE TONEN WAAROM SAMPLE RATE CONVERSION SLECHT IS.} \\
 \\\
@@ -31,7 +31,6 @@ Methodes als OLA, SOLA en PSOLA veranderen de snelheid van de geluidssignalen zo
 
 
 \section{Overlap and Add (OLA)}
-
 \subsection{Concept}
 Een zeer eenvoudig algoritme voor time stretching is het geluidssignaal te verdelen in overlappende deeltjes van een vaste lengte N. Deze originele fragmenten worden opgeschoven met een tijdsverschuiving van $ S_{a}$ samples. Vervolgens  \textbf{WORDEN}  de blokjes gepositioneerd met een tijdsverschuiving van $S_{s}$ = $\alpha$.$S_{a}$, waarbij $\alpha$ een variabele is die vrij gekozen mag worden \textbf{(OF BINNEN EEN BEPAALD INTERVAL?)} … Kleine delen van de opeenvolgende fragmenten overlappen hierdoor en op dit overlappend blok \textbf{WORDT} een fade-in en fade-out functie ge\"{i}mplementeerd \textbf{(AND SUMMED SAMPLE-BY-SAMPLE?)}.
 
@@ -102,8 +101,10 @@ Als dit getal groter is dan \verb|max_correlation|, de maximale waarde tot nu to
 Zo wordt de grootste waarde voor de kruiscorrelatie bepaald, alsook op welke positie van overlapping dit gebeurd. De twee delen worden dan zo verschuiven zodat het tweede stukje begint op de index van \verb|max_correlation_index|. De frames worden opgeteld met een kruisfade en dit wordt herhaald voor alle frames. Dit wordt ook grafisch weergegeven in \textbf{grafiek???}
 
 \section{PSOLA}
-\subsection{Pitch detecite met auto-correlatie}
-
+\subsection{Concept}
+\subsection{Uitwerking}
+\subsection{Zero-rate crossing}
+\subsubsection{Pitch detectie met auto-correlatie}
 Een meer robuuste manier om pitch detectie uit te voeren is door gebruik te maken van de autocorrelatie van een signaal. De autocorrelatie is gelijkend op de kruiscorrelatie in (?? verwijzing), maar bij de autocorrelatie wordt het algoritme toegepast op hetzelfde signaal. 
 Een venster van twee maal de lengte van de langste periode wordt  gebruikt om accuraat de pitch te bepalen. Als de shift in de auto-correlatie functie de fundamentele frequentie, bereikt de autocorrelatie een maximum. Dit maximum kan beschouwd worden als de pitch periode. Zo is het mogelijk om de pitch periode te bepalen van het signaal. 
 
