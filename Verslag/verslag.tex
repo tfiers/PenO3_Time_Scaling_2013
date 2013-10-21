@@ -114,11 +114,27 @@ overlapping_part_of_frame) / length_overlap;
 Als dit getal groter is dan \verb|max_correlation|, de maximale waarde tot nu toe  vervangen door de nieuwe maximale waarde, dan wordt de corresponderende \verb|max_correlation_index| ook vervangen.
 Zo wordt de grootste waarde voor de kruiscorrelatie bepaald, alsook op welke positie van overlapping dit gebeurd. De twee delen worden dan zo verschuiven zodat het tweede stukje begint op de index van \verb|max_correlation_index|. De frames worden opgeteld met een kruisfade en dit wordt herhaald voor alle frames. Dit wordt ook grafisch weergegeven in \textbf{grafiek???}
 
-\section{PSOLA}
-\subsection{Concept}
-\subsection{Uitwerking}
-\subsection{Zero-rate crossing}
-\subsubsection{Pitch detectie met auto-correlatie}
+\section{Pitch-Synchronous Overlap and Add (PSOLA)}
+
+\section{Pitch Detection} 
+
+\subsection{concept}
+
+De toonhoogte('pitch') is een attribuut dat wordt geassocieerd met de geluidsfrequentie. Afhankelijk van de frequentie van het signaal, wordt er een bepaalde toonhoogte aan gegeven. Ondanks het feit dat de twee niet equivalent zijn, zal de informatie afkomstig van de toonhoogte een kritieke rol spelen bij het 
+verbeteren van de voordien besproken time-stretching algoritmes.
+
+\subsection{Zero-crossing rate}
+
+De zero-crossing rate is een elementair 'pitch-detection' algoritme. Het werkt goed in de afwezigheid van ruis en wordt hier besproken vanwege zijn simpelheid en rekentijd. De zero-crossing rate bepaalt hoeveel keer de geluidsgolf de x-as snijdt in een bepaald tijdsinterval.
+
+\subsubsection{uitwerking}
+
+We definiëren een sign {} dat een +1 of 0 teruggeeft afhankelijk van het feit dat het signaal 0 is of niet. De zero-crossing rate (ZCR) mag gezien worden als:
+\begin{center}
+$ZCR=\frac{1}{N} \sum\limits_{n=0}^{N-1} |sign\{s(n)-sign\{s(n-1)\}\}|$
+\end{center}
+
+\subsection{Pitch detectie met auto-correlatie}
 Een meer robuuste manier om pitch detectie uit te voeren is door gebruik te maken van de autocorrelatie van een signaal. De autocorrelatie is gelijkend op de kruiscorrelatie in (?? verwijzing), maar bij de autocorrelatie wordt het algoritme toegepast op hetzelfde signaal. 
 Een venster van twee maal de lengte van de langste periode wordt  gebruikt om accuraat de pitch te bepalen. Als de shift in de auto-correlatie functie de fundamentele frequentie, bereikt de autocorrelatie een maximum. Dit maximum kan beschouwd worden als de pitch periode. Zo is het mogelijk om de pitch periode te bepalen van het signaal. 
 
