@@ -145,10 +145,20 @@ We definiëren een sign {} dat een +1 of 0 teruggeeft afhankelijk van het feit d
 \begin{center}
 $ZCR=\frac{1}{N} \sum\limits_{n=0}^{N-1} |sign\{s(n)-sign\{s(n-1)\}\}|$
 \end{center}
+Door deze zero-crossing rate door 2 te delen bekomen we het aantal periodes van het signaal. De fundamentele frequentie van het signaal wordt berekend door de duur van het signaal hierdoor te delen.
+
+\subsubsection{verbetering}
+
+Echte signalen zullen vaak meerdere keren per halve periode van teken wisselen. Dit gebeurt omdat opgenomen signalen meestal een combinatie zijn van verschillende frequenties. Vaak zal er ook ruis op zitten, wat ook voor schommelingen rond nul kan zorgen.\\
+\\
+Om hiermee rekening te houden kan er een band rond de gemiddelde van de datapunten gedefineeerd worden. Dan wordt een analoog algoritme toegepast dat, in de plaats van te meten hoe veel keer er van teken wordt gewisseld, meet hoe veel keer deze band gekruist wordt.\\
+\\
+Zelfs met deze verbetering blijft het zero-crossing rate algoritme niet erg betrouwbaar omdat deze bandbreedte voor sommige golven heel precies bepaald moet worden. Als die te breed is kan het zijn dat bepaalde kleinere, maar toch relevante, pieken niet worden meegerekend. In het geval dat die te smal is zal ze haar gewenste effect niet hebben.
+
 
 \subsection{Pitch detectie met auto-correlatie}
-Een meer robuuste manier om pitch detectie uit te voeren is door gebruik te maken van de autocorrelatie van een signaal. De autocorrelatie is gelijkend op de kruiscorrelatie in (?? verwijzing), maar bij de autocorrelatie wordt het algoritme toegepast op hetzelfde signaal. 
-Een venster van twee maal de lengte van de langste periode wordt  gebruikt om accuraat de pitch te bepalen. Als de shift in de auto-correlatie functie de fundamentele frequentie, bereikt de autocorrelatie een maximum. Dit maximum kan beschouwd worden als de pitch periode. Zo is het mogelijk om de pitch periode te bepalen van het signaal. 
+Een meer robuuste manier om pitch detectie uit te voeren is door gebruik te maken van de autocorrelatie van een signaal. De autocorrelatie is gelijkend op de kruiscorrelatie in \textbf{(?? verwijzing)}, maar bij de autocorrelatie wordt het algoritme toegepast op hetzelfde signaal. 
+Een venster van twee maal de lengte van de langste verwachtte periode wordt  gebruikt om accuraat de pitch te bepalen. Bij een verschuiving gelijk aan een periode zal de waarde van de auto-correlatie functie een maximum bereiken. Aan de hand hiervan kan de frequentie berekend worden.
 
 %Code bekijken en verder aanvullen
 

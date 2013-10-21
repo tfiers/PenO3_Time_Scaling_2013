@@ -1,0 +1,28 @@
+\select@language {dutch}
+\contentsline {section}{\numberline {0.1}Introductie}{3}
+\contentsline {section}{\numberline {0.2}Sample Rate Change}{3}
+\contentsline {section}{\numberline {0.3}Overlap and Add (OLA)}{4}
+\contentsline {subsection}{\numberline {0.3.1}Concept}{4}
+\contentsline {subsection}{\numberline {0.3.2}Uitwerking}{4}
+\contentsline {paragraph}{Fade-in en fade-out:}{6}
+\contentsline {subsection}{\numberline {0.3.3}Interpretatie}{6}
+\contentsline {section}{\numberline {0.4}Synchronous Overlap and Add (SOLA)}{7}
+\contentsline {subsection}{\numberline {0.4.1}Concept}{7}
+\contentsline {subsection}{\numberline {0.4.2}Uitwerking}{7}
+\contentsline {section}{\numberline {0.5}Pitch-Synchronous Overlap and Add (PSOLA)}{9}
+\contentsline {section}{\numberline {0.6}Pitch Detection}{9}
+\contentsline {subsection}{\numberline {0.6.1}concept}{9}
+\contentsline {subsection}{\numberline {0.6.2}Zero-crossing rate}{9}
+\contentsline {subsubsection}{uitwerking}{9}
+\contentsline {subsubsection}{verbetering}{10}
+\contentsline {subsection}{\numberline {0.6.3}Pitch detectie met auto-correlatie}{10}
+\contentsline {section}{\numberline {0.7}Vergelijking verschillende algoritmes}{10}
+\contentsline {subsection}{\numberline {0.7.1}Frequentie en signaal plots}{10}
+\contentsline {subsection}{\numberline {0.7.2}Enquete}{10}
+\contentsline {section}{\numberline {0.8}Werkwijze}{12}
+\contentsline {section}{\numberline {0.9}Vakintegratie}{12}
+\contentsline {section}{\numberline {0.10}Bijlage A}{14}
+\contentsline {section}{\numberline {0.11}Bijlage B}{14}
+\contentsline {chapter}{\numberline {1}Tijdelijke Commentaar}{15}
+\contentsline {section}{\numberline {1.1}Informele inhoudstafel}{15}
+\contentsline {section}{\numberline {1.2}Algemene opmerkingen}{16}
