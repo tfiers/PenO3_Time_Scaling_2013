@@ -3,6 +3,11 @@
 \usepackage[dutch]{babel}
 \usepackage{graphicx}
 
+
+% Uncomment dit om comments te renderen in de pdf.
+% http://stackoverflow.com/questions/3696128/latex-tag-for-making-a-comment-appear-or-disappear-in-pdf
+% \renewenvironment{comment}{}{}
+
 \begin{document}
 
 \tableofcontents
@@ -32,24 +37,23 @@ Methodes als OLA, SOLA en PSOLA veranderen de snelheid van de geluidssignalen zo
 
 \section{Overlap and Add (OLA)}
 \subsection{Concept}
-Een zeer eenvoudig algoritme voor time stretching is het geluidssignaal te verdelen in overlappende deeltjes van een vaste lengte N. Deze originele fragmenten worden opgeschoven met een tijdsverschuiving van $ S_{a}$ samples. Vervolgens  \textbf{WORDEN}  de blokjes gepositioneerd met een tijdsverschuiving van $S_{s}$ = $\alpha$.$S_{a}$, waarbij $\alpha$ een variabele is die vrij gekozen mag worden \textbf{(OF BINNEN EEN BEPAALD INTERVAL?)} … Kleine delen van de opeenvolgende fragmenten overlappen hierdoor en op dit overlappend blok \textbf{WORDT} een fade-in en fade-out functie ge\"{i}mplementeerd \textbf{(AND SUMMED SAMPLE-BY-SAMPLE?)}.
+Een zeer eenvoudig time stretching algoritme is het geluidssignaal te verdelen in overlappende deeltjes van een vaste lengte N. Deze originele fragmenten worden opgeschoven met een tijdsverschuiving van $ S_{a}$ samples. Vervolgens  \textbf{worden}  de blokjes gepositioneerd met een tijdsverschuiving van $S_{s}$ = $\alpha$.$S_{a}$, waarbij $\alpha$ een variabele is die vrij gekozen mag worden. Alpha is de variabele die bepaalt in welke mate het geluidsfragment vertraagd of versneld wordt en ligt typisch ...  \textbf{binnen een bepaald interval...)} 
 
 \textbf{FIGUUR MOET NOG GEHERPOSITIONEERD WORDEN}
 
 \begin{figure}
 \centering
 \includegraphics[width=\textwidth]{ola}
-\caption{CAPTION LOLOL}
+\caption{Principe van het OLA-algoritme}
 \label{fig:OLA}
 \end{figure}
 
-Uiteindelijk schakelt het algoritme de uiteengehaalde fragmenten weer aan elkaar om op deze manier een tijdsgestrekt signaal te bekomen.
-
+Door deze verschuiving overlappen kleine delen van de opeenvolgende fragmenten en op dit overlappend blok \textbf{wordt} een fade-in en fade-out functie ge\"{i}mplementeerd \textbf{(and summed sample-by-sample?)}. Uiteindelijk schakelt het algoritme de uiteengehaalde fragmenten weer aan elkaar om op deze manier een tijdsgestrekt signaal te bekomen.
 
 \subsection{Uitwerking}
 {\footnotesize \textit{\textbf{Bijlage A ???} bevat de volledige MATLAB-code voorzien van toelichting.}}\\
 
-\noindent Deze paragraaf geeft een beschrijving van de implementatie van het OLA-algoritme in MATLAB. De OLA-functie gebruikt vijf argumenten, waarvan het eerste verwijst naar het geluidssignaal dat ingeladen moet worden.
+\noindent Deze paragraaf geeft een beschrijving van de implementatie van het OLA-algoritme in \verb+MATLAB+. De OLA-functie gebruikt vijf argumenten, waarvan het eerste verwijst naar het geluidssignaal dat ingeladen moet worden.
 \begin{verbatim}
 function timeshifted_signal = timeshift_OLA(filename, sample_rate,
 		                              overlap, fps, alpha)		                           
@@ -57,15 +61,25 @@ function timeshifted_signal = timeshift_OLA(filename, sample_rate,
 De sample-rate staat voor het aantal frames per seconde waaruit het geluidssignaal bestaat en staat standaard op 44100. \textbf{DIT MOET ER EIGENLIJK NIET BIJ}
 \\
 \\
-Het OLA-algoritme bestaat uit drie grote delen. Het eerste deel laadt het audiosignaal binnen en splitst het simpelweg in twee kanalen, een linker- en een rechtersignaal. Een audiosignaal is namelijk een vector van dimensie \verb+nx2+, waarbij het aantal rijen \verb+n+ afhankelijk is van de lengte van de opname. De twee kolommen stelt het geluid voor van respectievelijk het linker- en rechtersignaal. Het programma  past apart de code toe op beide signalen.\\
+Het OLA-algoritme bestaat uit drie grote delen. Het eerste deel laadt het audiosignaal binnen en splitst het simpelweg in twee kanalen, een linker- en een rechtersignaal. Een audiosignaal is namelijk een vector van dimensie \verb+nx2+, waarbij het aantal rijen \verb+n+ afhankelijk is van de lengte van de opname. De twee kolommen stelt het geluid voor van respectievelijk het linker- en rechtersignaal. Het programma  past verder apart de code toe op beide signalen.\\
 
-In een tweede gedeelte worden zowel het linker- als het rechtersignaal opgesplitst in frames van een vaste lengte \verb+frame_size+. De lengte \verb+frame_size+ is gelijk aan de \verb+sample_rate+ (het aantal samples per seconde) gedeeld door de \verb+fps+ (het aantal frames per seconde) en heeft als eenheid samples per frame. Het algoritme gebruikt voor het opdelen van het audiosignaal een apart geschreven functie \verb+make_frames+ (cfr. \cref{sec:bijlageA}), waarvan ook het SOLA-algoritme gebruik maakt. De functie \verb+make_frames+ heeft als output een lijst \verb+frames+ waarvan elke rij de data bevat voor \'e\'en apart fragmentje. Om deze aparte fragmentjes aan te maken, hanteert de functie een \verb+for+-lus. In elke \verb+for+-lus zorgt array-slicing \textbf{(JUISTE TERMINOLOGIE?)} voor de aanmaak van een fragment.  Hierbij wordt meteen rekening gehouden met de gewilde overlap en dus zullen het begin en einde van opeenvolgende frames dezelfde data bevatten. Standaard staat de overlap op 50\%, wat inhoudt dat de tweede helft van een eerste frame volledig dezelfde data bevat als de eerste helft van het daaropvolgende frame (zie ook \cref{fig:OLA}). Belangrijk is dat het algoritme bij de \verb+for+-lus het concept preallocatie toepast.
-De preallocatie van de outputlijst zorgt ervoor dat dit algoritme (15sec --> 0,3seco
+In een tweede gedeelte worden zowel het linker- als het rechtersignaal opgesplitst in frames van een vaste lengte \verb+frame_size+. De lengte \verb+frame_size+ is gelijk aan de \verb+sample_rate+ (het aantal samples per seconde) gedeeld door de \verb+fps+ (het aantal frames per seconde) en heeft als eenheid samples per frame. Het algoritme gebruikt voor het opdelen van het audiosignaal een apart geschreven functie \verb+make_frames+ (cfr. \cref{sec:bijlageA}), waarvan ook het SOLA-algoritme gebruik maakt. De functie \verb+make_frames+ heeft als output een lijst \verb+frames+ waarvan elke rij de data bevat voor \'e\'en van de aparte opgesplitste fragmenten. Om deze aparte fragmenten aan te maken, hanteert de functie een \verb+for+-lus. Concreet zorgt array-slicing van het inputsignaal \textbf{(juiste terminologie?)} in elke \verb+for+-lus voor de aanmaak van een fragment.  Hierbij wordt meteen rekening gehouden met de gewilde overlap en dus zullen het begin en einde van opeenvolgende frames dezelfde data bevatten. Standaard staat de overlap op 50\%, wat inhoudt dat de tweede helft van een eerste frame volledig dezelfde data bevat als de eerste helft van het daaropvolgende frame (zie ook \cref{fig:OLA}). Belangrijk is dat het algoritme bij de \verb+for+-lus het concept preallocatie toepast.
+Preallocatie houdt in dat \textbf{je} op voorhand de juiste lengte bepaalt van de lijst waarvan in elke \verb+for+-lus informatie wordt toegevoegd. Zo wordt tijdens elke iteratie de elementen van de lijst overschreven met deze informatie in plaats van toegevoegd zonder dat de lengte van de lijst verandert. Specifiek gaat het hier om de outputlijst \verb+frames+. Deze lijst heeft voor de lus enkel nullen, die elke iteratie overschreven worden met de data van \'e\'en afgesplitst fragment. De snelheid van het algoritme verhoogt hierdoor aanzienlijk; het duurt niet langer 15 seconden om het programma uit te voeren, maar slechts 0,3 seconden.\\
+\\
+Het derde en laatste deel bestaat erin om de opgesplitste fragmenten, aanwezig in de lijst \verb+frames+ (of \verb+frames_left+ en \verb+frames_right+???), te recombineren, wat resulteert in de outputlijst \verb+timeshifted_signal+ die de data voor het tijdsverschoven geluidssignaal bevat. Dit deel omvat nogmaals een \verb+for+-lus, waarbij ook hier preallocatie wordt toegepast. Concreet \textbf{worden} er tijdens elke iteratie twee indices bijgehouden, \verb+index1+ en \verb+index2+. 
+\textit{ 'index1' is the index in the output signal where the overlap with the next-to-be-added frame (framel/framer) starts.
+ 'index2' is the index of the last sample in the output singal, where the overlap stops of course.}
 
 
+\paragraph{Fade-in en fade-out:} Het algoritme werkt nu reeds "degelijk" maar een verbetering zou zijn om ...
+\subsection{Interpretatie}
+Positieve punten:
+beter dan resample.
+geen verandering van de toonhoogte.
 
-
-\paragraph{Fade-in en fade-out:}
+Negatieve punten:
+- veel ruis zeker als geen crossfade functie.
+maar OLA maakt geen gebruik van de inhoud van de data/informatie over de pitch enzovoort, het past het algoritme op alle data toe...
 
 \section{Synchronous Overlap and Add (SOLA)}
 \label{sec:SOLA}
@@ -100,27 +114,11 @@ overlapping_part_of_frame) / length_overlap;
 Als dit getal groter is dan \verb|max_correlation|, de maximale waarde tot nu toe  vervangen door de nieuwe maximale waarde, dan wordt de corresponderende \verb|max_correlation_index| ook vervangen.
 Zo wordt de grootste waarde voor de kruiscorrelatie bepaald, alsook op welke positie van overlapping dit gebeurd. De twee delen worden dan zo verschuiven zodat het tweede stukje begint op de index van \verb|max_correlation_index|. De frames worden opgeteld met een kruisfade en dit wordt herhaald voor alle frames. Dit wordt ook grafisch weergegeven in \textbf{grafiek???}
 
-\section{Pitch-Synchronous Overlap and Add (PSOLA)}
-
-\section{Pitch Detection} 
-
-\subsection{concept}
-
-De toonhoogte('pitch') is een attribuut dat wordt geassocieerd met de geluidsfrequentie. Afhankelijk van de frequentie van het signaal, wordt er een bepaalde toonhoogte aan gegeven. Ondanks het feit dat de twee niet equivalent zijn, zal de informatie afkomstig van de toonhoogte een kritieke rol spelen bij het 
-verbeteren van de voordien besproken time-stretching algoritmes.
-
-\subsection{Zero-crossing rate}
-
-De zero-crossing rate is een elementair 'pitch-detection' algoritme. Het werkt goed in de afwezigheid van ruis en wordt hier besproken vanwege zijn simpelheid en rekentijd. De zero-crossing rate bepaalt hoeveel keer de geluidsgolf de x-as snijdt in een bepaald tijdsinterval.
-
-\subsubsection{uitwerking}
-
-We definiëren een sign {} dat een +1 of 0 teruggeeft afhankelijk van het feit dat het signaal 0 is of niet. De zero-crossing rate (ZCR) mag gezien worden als:
-\begin{center}
-$ZCR=\frac{1}{N} \sum\limits_{n=0}^{N-1} |sign\{s(n)-sign\{s(n-1)\}\}|$
-\end{center}
-
-\subsection{Pitch detectie met auto-correlatie}
+\section{PSOLA}
+\subsection{Concept}
+\subsection{Uitwerking}
+\subsection{Zero-rate crossing}
+\subsubsection{Pitch detectie met auto-correlatie}
 Een meer robuuste manier om pitch detectie uit te voeren is door gebruik te maken van de autocorrelatie van een signaal. De autocorrelatie is gelijkend op de kruiscorrelatie in (?? verwijzing), maar bij de autocorrelatie wordt het algoritme toegepast op hetzelfde signaal. 
 Een venster van twee maal de lengte van de langste periode wordt  gebruikt om accuraat de pitch te bepalen. Als de shift in de auto-correlatie functie de fundamentele frequentie, bereikt de autocorrelatie een maximum. Dit maximum kan beschouwd worden als de pitch periode. Zo is het mogelijk om de pitch periode te bepalen van het signaal. 
 
@@ -139,11 +137,11 @@ In het implementeren van de voorgaande algoritmes werd steeds gebruikt gemaakt v
 \chapter*{Werkwijze en vakintegratie}
 \section{Werkwijze}
 
-Elke PenO zitting beginnen we met een korte vergadering. Hierin bespreken we eerst de eventuele huistaken en hoe deze verlopen zijn. Dan passen we indien nodig de  algemene planning aan en stellen we de dagplanning op met de taakverdeling. Dit gebeurt in Asana, een handige webinterface diealle projecttaken makkelijk laat inplannen. Vervolgens maken we via Instagantt een Gant-chart voor een duidelijk overzicht. 
+Elke P\&O zitting beginnen we met een korte vergadering. Hierin bespreken we eerst de eventuele huistaken en hoe deze verlopen zijn. Dan passen we indien nodig de  algemene planning aan en stellen we de dagplanning op met de taakverdeling. Dit gebeurt in Asana, een handige webinterface diealle projecttaken makkelijk laat inplannen. Vervolgens maken we via Instagantt een Gant-chart voor een duidelijk overzicht. 
 Als er moet geprogrammeerd worden proberen we in groepjes van twee te werken. Volgens het ‘Pair Programming’-systeem kan dan één persoon de code typen en de andere kijkt onmiddellijk na op fouten. 
 \section{Vakintegratie}
 
-Bij dit project wordt de kennis uit verschillende vakken toegepast. Het project werkt met geluid. Een matrix stelt het geluid voor. Bewerkingen op matrices werd aangeleerd in het vak toegepaste algebra. Het frequentiespectrum kan berekend worden door een fourier transformatie. Dit werd gezien in het vak Informatie-Overdracht en Verwerking en in Elektrische Netwerken. Het schrijven van de algoritmes in Matlab vergt kennis opgedaan uit het vak methodiek van de informatica. In de algoritmes wordt ook gebruikt gemaakt van een crosscorrelatie die werkt met een convolutie. Dit staat uitgelegd in de cursus Algebra en Analyse. Daarnaast wordt de kennis van PenO 1 en 2 toegepast in de vergaderingen. 
+Bij dit project wordt de kennis uit verschillende vakken toegepast. Het project werkt met geluid. Een matrix stelt het geluid voor. Bewerkingen op matrices werd aangeleerd in het vak toegpaste algebra. Het frequentiespectrum kan berekend worden door een fourier transformatie. Dit werd gezien in het vak Informatie-Overdracht en Verwerking en in Elektrische Netwerken. Het schrijven van de algoritmes in Matlab vergt kennis opgedaan uit het vak methodiek van de informatica. In de algoritmes wordt ook gebruikt gemaakt van een crosscorrelatie die werkt met een convolutie. Dit staat uitgelegd in de cursus Algebra en Analyse. Daarnaast wordt de kennis van P\&O 1 en 2 toegepast in de vergaderingen. 
 
 \chapter*{Besluit}
 
@@ -202,6 +200,11 @@ Wat moet er zeker in het verslag?
 \item Formule crosscorelatie
 \item Foto crosscorelatie
 \item Foto's invoegen
+\item titels terug toevoegen?
+\item interpretatie?
+\item Foto's op de juiste plaats zien te krijgen.
+\item zien wat er niet mee upgedatet is.
+
 \end{itemize}
 
 

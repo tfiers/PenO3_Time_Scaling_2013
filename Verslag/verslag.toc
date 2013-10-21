@@ -5,22 +5,22 @@
 \contentsline {subsection}{\numberline {0.3.1}Concept}{4}
 \contentsline {subsection}{\numberline {0.3.2}Uitwerking}{4}
 \contentsline {paragraph}{Fade-in en fade-out:}{6}
-\contentsline {section}{\numberline {0.4}Synchronous Overlap and Add (SOLA)}{6}
-\contentsline {subsection}{\numberline {0.4.1}Concept}{6}
-\contentsline {subsection}{\numberline {0.4.2}Uitwerking}{6}
-\contentsline {section}{\numberline {0.5}Pitch-Synchronous Overlap and Add (PSOLA)}{8}
-\contentsline {section}{\numberline {0.6}Pitch Detection}{8}
-\contentsline {subsection}{\numberline {0.6.1}concept}{8}
-\contentsline {subsection}{\numberline {0.6.2}Zero-crossing rate}{8}
-\contentsline {subsubsection}{uitwerking}{8}
-\contentsline {subsection}{\numberline {0.6.3}Pitch detectie met auto-correlatie}{8}
-\contentsline {section}{\numberline {0.7}Vergelijking verschillende algoritmes}{9}
-\contentsline {subsection}{\numberline {0.7.1}Frequentie en signaal plots}{9}
-\contentsline {subsection}{\numberline {0.7.2}Enquete}{9}
-\contentsline {section}{\numberline {0.8}Werkwijze}{11}
-\contentsline {section}{\numberline {0.9}Vakintegratie}{11}
-\contentsline {section}{\numberline {0.10}Bijlage A}{13}
-\contentsline {section}{\numberline {0.11}Bijlage B}{13}
+\contentsline {subsection}{\numberline {0.3.3}Interpretatie}{6}
+\contentsline {section}{\numberline {0.4}Synchronous Overlap and Add (SOLA)}{7}
+\contentsline {subsection}{\numberline {0.4.1}Concept}{7}
+\contentsline {subsection}{\numberline {0.4.2}Uitwerking}{7}
+\contentsline {section}{\numberline {0.5}PSOLA}{9}
+\contentsline {subsection}{\numberline {0.5.1}Concept}{9}
+\contentsline {subsection}{\numberline {0.5.2}Uitwerking}{9}
+\contentsline {subsection}{\numberline {0.5.3}Zero-rate crossing}{9}
+\contentsline {subsubsection}{Pitch detectie met auto-correlatie}{9}
+\contentsline {section}{\numberline {0.6}Vergelijking verschillende algoritmes}{9}
+\contentsline {subsection}{\numberline {0.6.1}Frequentie en signaal plots}{9}
+\contentsline {subsection}{\numberline {0.6.2}Enquete}{9}
+\contentsline {section}{\numberline {0.7}Werkwijze}{11}
+\contentsline {section}{\numberline {0.8}Vakintegratie}{11}
+\contentsline {section}{\numberline {0.9}Bijlage A}{13}
+\contentsline {section}{\numberline {0.10}Bijlage B}{13}
 \contentsline {chapter}{\numberline {1}Tijdelijke Commentaar}{14}
 \contentsline {section}{\numberline {1.1}Informele inhoudstafel}{14}
 \contentsline {section}{\numberline {1.2}Algemene opmerkingen}{15}
