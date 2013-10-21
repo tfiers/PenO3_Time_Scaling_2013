@@ -90,11 +90,12 @@ Het algoritme verschuift de blokken met de tijdsfactor $\alpha$, en zoekt daarna
 
 \subsection{Uitwerking}
 De kruiscorrelatie is een manier om gelijkenissen tussen twee geluidsgolven te vinden. Het is een veelgebruikte manier bij signaalverwerking om kleinere geluidsgolven in een langer sample te herkennen, wat leidt tot patroonherkenning. Hier leidt de kruiscorrelatie tot het vinden van de index waarbij de overlapping tussen de twee frames een maximale overeenkomst vertoont.
-De kruiscorrelatie wordt gegeven door :
+De kruiscorrelatie waarbij het tweede signaal naar voren schuift, geeft men weer door :
 \begin{center}
-$(x_{L1}*x_{L2})[m]=\frac{1}{L} \sum\limits_{n=0}^{L-m-1}  x_{L1}^{*}[n]\cdot x_{L2}[n+m], 0 \le m < L $
+$(x_{L1} \star x_{L2})[m]=\frac{1}{L} \sum\limits_{n=0}^{L-m-1}  x_{L1}^{*}[n]\cdot x_{L2}[n+m], 0 \le m < L $
 \end{center}
-met $x_{L1}[n]$ en $x_{L2}[n+m]$ de delen van $x_{1}[n]$ en $x_{2}[n]$ in het overlappende interval met lengte L. De index van de maximale overlap wordt gebruikt om de signalen te overlappen.
+met $x_{L1}[n]$ en $x_{L2}[n+m]$ de delen van $x_{1}[n]$ en $x_{2}[n]$ in het overlappende interval met lengte L en $x_{L1}^{*}$ de complex toegevoegde is van $x_{L1}$, de discrete signalen hebben echter geen complexe waarden en dus is $x_{L1}^{*}=x_{L1}$. Om het tweede signaal naar links te verschuiven zal men in de code (voor de kruiscorrelatie) het argument van het eerste en het tweede signaal met elkaar verwisselen.  
+Bij zowel het naar voren als naar achter verschuiven van het tweede signaal, gebruikt men de index van de maximale overlap om de signalen met elkaar te overlappen.
 In het algoritme gebeurt de bepaling van de maximale overlapping door voor elke mogelijke overlapping een getal, de correlatie, te berekenen. Dit is de som van alle elementen in een matrix, gedeeld door de lengte van de overlapping. De matrix is gelijk aan de element-per-element vermenigvuldiging van het eerste deeltje en het tweede overlappende deel. In de code staat dit als:
 \textbf{FIGUUR MOET NOG GEHERPOSITIONEERD WORDEN}
 \begin{figure}
@@ -133,10 +134,36 @@ We definiëren een sign {} dat een +1 of 0 teruggeeft afhankelijk van het feit d
 \begin{center}
 $ZCR=\frac{1}{N} \sum\limits_{n=0}^{N-1} |sign\{s(n)-sign\{s(n-1)\}\}|$
 \end{center}
+waar $1/N$ de normalisatie voorziet om de crossing-rate te vinden. Om de fundamentele frequentie $f_f$ van de golfvorm in een frame te berekenen, gebruiken we volgende formule
+\begin{center}
+$f_f=\frac{ZCR\; . \;f_f}{2}$
+\end{center} 
+De ZCR-aanpak werkt goed voor zowel zuivere spraaktonen als voor sommige spraakfragmenten. Maar indien men de ZCR-methode gaat toepassen op een meer complexe golfvorm van een spraaksignaal, zal de weergegeven ZCR niet meer accuraat de werkelijke crossing-rate weergeven.
+
+Hiervoor bestaat de mogelijkheid erin om de zero-crossing rate aan te passen door gebruik te maken van een 'threshold'. Een threshold is voorgesteld in de vorm
+\begin{center}
+$\sigma=\gamma\frac{1}{N} \sum\limits_{n=0}^{N-1} |s(n)|$
+\end{center}
+waarbij $\gamma\approx1.2$. Een nieuw signaal $s_p=s(n)-\sigma$ is gedefinieërd en i.p.v. de ZCR te tellen, telt men nu de van negatief naar positieve overgangen($ZCR_p$). Dit geeft een positieve rate overgang die overeenstemt met een halve-periode van de fundamentele frequentie van
+\begin{center}
+$f_{f_{p}}=ZCR_p\; . \;f_s$
+\end{center}
+Eveneens is een negatieve verplaatsing tot de ZCR weergegeven als $s_n=s(n)+\sigma$. Net zoals bij de positieve verplaatsing telt men enkel de positieve tot negatieve overgangen en deze resulteren in een andere halve-periode van de fundamentele frequentie $f_{f_{n}}$. Uiteindelijk is de werkelijke fundamentele frequentie gegeven als het gemiddelde van de twee frequenties of 
+\begin{center}
+$\frac{f_{f_{p}}+f_{f_{n}}}{2}$
+\end{center}
+In de aanwezigheid van ruis worden deze technieken nog moeilijker aangezien er 'jitter'(onregelmatigheden in de tijdsbasis van het digitaal signaal) rond het zero-crossing punt. Een ander concept van een threshold-crossing rate(TCR) zal hierdoor de hoeveelheid ruis bijhouden dat aanwezig is in het signaal.
 
 \subsection{Pitch detectie met auto-correlatie}
-Een meer robuuste manier om pitch detectie uit te voeren is door gebruik te maken van de autocorrelatie van een signaal. De autocorrelatie is gelijkend op de kruiscorrelatie in (?? verwijzing), maar bij de autocorrelatie wordt het algoritme toegepast op hetzelfde signaal. 
-Een venster van twee maal de lengte van de langste periode wordt  gebruikt om accuraat de pitch te bepalen. Als de shift in de auto-correlatie functie de fundamentele frequentie, bereikt de autocorrelatie een maximum. Dit maximum kan beschouwd worden als de pitch periode. Zo is het mogelijk om de pitch periode te bepalen van het signaal. 
+
+\subsubsection{concept}
+Nog een andere, meer robuuste manier om pitch detectie uit te voeren is door gebruik te maken van de autocorrelatie van een signaal. De autocorrelatie lijkt op de kruiscorrelatie maar bij de autocorrelatie wordt het algoritme toegepast op eenzelfde signaal. Om accuraat de toonhoogte te bepalen, neemt men 'ruiten' van het signaal die tenminste twee keer zo lang zijn als de langste periode die men zou willen detecteren.
+
+Wanneer de verplaatsing in de auto-correlatie functie de fundamentele frequentie begint te bereiken, is er een maximum in de auto-correlatie functie te vinden. Dit maximum zal de 'toonhoogte periode' voorstellen en bijgevolg, door gebruik te maken van de auto-correlatie functie, kan men de 'toonhoogte periode' van het signaal afleiden . De auto-correlatie functie is gevonden door
+\begin{center}
+$r_{xL1}r_{xL1}=\frac{1}{L} \sum\limits_{n=0}^{L-m-1}  x_{L1}[n]\cdot x_{L1}[n+m], 0 \le m < L $
+\end{center}
+waarbij $x_{L1}(n)$ het deel is van $x_1(n)$ met een intervallengte L.
 
 %Code bekijken en verder aanvullen
 
