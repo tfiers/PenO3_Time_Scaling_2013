@@ -124,6 +124,10 @@ Als dit getal groter is dan \verb|max_correlation|, de maximale waarde tot nu to
 Zo wordt de grootste waarde voor de kruiscorrelatie bepaald, alsook op welke positie van overlapping dit gebeurd. De twee delen worden dan zo verschuiven zodat het tweede stukje begint op de index van \verb|max_correlation_index|. De frames worden opgeteld met een kruisfade en dit wordt herhaald voor alle frames. Dit wordt ook grafisch weergegeven in \textbf{grafiek???}
 
 \section{Pitch-Synchronous Overlap and Add (PSOLA)}
+Pitch-Synchronous Overlap Add maakt gebruik van de veronderstelling dat geluid gekenmerkt is door zijn toonhoogte. Het synchroniseert kleine overlappende geluidsfragmenten op basis van deze toonhoogtes om zo discontinuïteiten te voorkomen. 
+Allereerst detecteert het algoritme periodisch de toonhoogte van elk geluidsframe waarin het geheel wordt opgedeeld en houdt de plaats ervan bij in de tijd (pitch mark). Door gebruik te maken van een Hanning-venster wordt het geluidsfragment rond elke pitch mark apart geëxtraheerd. De lengte van het Hanning-venster is gelijk aan het dubbele van de periode zodat later de fade-in en fade-out correct werkt.
+Vervolgens voegt het algoritme de frames samen via volgend principe: afhankelijk van de variabele alpha (die de versnelling of vertraging bepaald) wordt als volgend geluidsframe dat frame genomen waarvan de pitch mark het dichtstbij ligt. Zo kan het dus dat frames worden overgeslagen of dubbel genomen. Na het overlappen en optellen van de frames kijkt het algoritme naar de volgende pitch mark en herhaalt de bovenbeschreven stappen.
+
 
 \section{Pitch Detection} 
 
@@ -161,15 +165,7 @@ In het implementeren van de voorgaande algoritmes werd steeds gebruikt gemaakt v
 
 \chapter{Werkwijze en vakintegratie}
 \section{Werkwijze}
-
-<<<<<<< HEAD
 Elke P\&O zitting beginnen we met een korte vergadering. Hierin bespreken we eerst de eventuele huistaken en hoe deze verlopen zijn. Dan passen we indien nodig de  algemene planning aan en stellen we de dagplanning op met de taakverdeling. Dit gebeurt in Asana, een handige webinterface diealle projecttaken makkelijk laat inplannen. Vervolgens maken we via Instagantt een Gant-chart voor een duidelijk overzicht. 
-Als er moet geprogrammeerd worden proberen we in groepjes van twee te werken. Volgens het ‘Pair Programming’-systeem kan dan één persoon de code typen en de andere kijkt onmiddellijk na op fouten. 
-\section{Vakintegratie}
-
-Bij dit project wordt de kennis uit verschillende vakken toegepast. Het project werkt met geluid. Een matrix stelt het geluid voor. Bewerkingen op matrices werd aangeleerd in het vak toegpaste algebra. Het frequentiespectrum kan berekend worden door een fourier transformatie. Dit werd gezien in het vak Informatie-Overdracht en Verwerking en in Elektrische Netwerken. Het schrijven van de algoritmes in Matlab vergt kennis opgedaan uit het vak methodiek van de informatica. In de algoritmes wordt ook gebruikt gemaakt van een crosscorrelatie die werkt met een convolutie. Dit staat uitgelegd in de cursus Algebra en Analyse. Daarnaast wordt de kennis van P\&O 1 en 2 toegepast in de vergaderingen. 
-=======
-Elke PenO zitting beginnen we met een korte vergadering. Hierin bespreken we eerst de eventuele huistaken en hoe deze verlopen zijn. Dan passen we indien nodig de  algemene planning aan en stellen we de dagplanning op met de taakverdeling. Dit gebeurt in Asana, een handige webinterface diealle projecttaken makkelijk laat inplannen. Vervolgens maken we via Instagantt een Gant-chart voor een duidelijk overzicht. 
 Als er moet geprogrammeerd worden proberen we in groepjes van twee te werken. Volgens het ‘Pair Programming’-systeem kan dan één persoon de code typen en de andere kijkt onmiddellijk na op fouten. 
 \section{Vakintegratie}
 
