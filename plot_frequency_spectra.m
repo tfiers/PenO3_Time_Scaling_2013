@@ -14,18 +14,19 @@ function  plot_frequency_spectra(filename1, filename2, name1_legend, name2_legen
     f = Fs/2*linspace(0,1,NFFT/2+1);
 
     figure
-    plot(f,2*abs(X(1:NFFT/2+1)),'c','LineWidth',3)
+    plot(f,2*abs(X(1:NFFT/2+1)),'c')
     title('Frequency spectra')
     xlabel('Frequency (Hz)')
     ylabel('Power')
     hold on
     plot(f,2*abs(Y(1:NFFT/2+1)),'b')
+    axis([0 1.5*10^4 0 0.01])
     legend(name1_legend, name2_legend)
     hold off
 
 
     figure
-    plot(t, x,'c','LineWidth',2)
+    plot(x,'c')
     title('Audio signals')
     xlabel('Time (s)')
     ylabel('Amplitude')

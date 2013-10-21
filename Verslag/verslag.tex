@@ -21,11 +21,10 @@
 \tableofcontents
 
 \chapter{Inleiding}
-
+\label{references} 
 Wanneer geluid wordt opgenomen is het soms handig om de opname te versnellen of te vertragen. Dit heeft tal van toepassingen, zoals bij het presenteren van het nieuws of bij het ‘beatmatchen’ van muzieknummers voor een dj. Een nieuwsanker moet veel informatie geven binnen een bepaalde tijdsspanne en af en toe gaat dit ten koste van de verstaanbaarheid. Het kan dus nuttig zijn om te snelle spraak te vertragen. Deze techniek wordt eveneens toegepast bij live muzikale optredens om op de maat te spelen.
 Dit gebeurt ook wanneer het geluid bij een beeld moet gezet worden, wanneer ze niet samen zijn opgenomen. Een andere toepassing is om teksten die in een normaal tempo zijn voorgelezen te versnellen zodat blinden, die een verscherpt gehoor hebben, ook boeken kunnen 'lezen'. Het omgekeerde gebeurt voor mensen die een vreemde taal leren. [1],[2]
 \cite{Thesis}
- 
 
 Als het geluid sneller of trager wordt afgespeeld door het veranderen van de bemonsteringsfrequentie, zal de toon hoger of later gaan klinken. Via \textit{time scaling} of \textit{time stretching} kan men een audiosignaal versnellen of vertragen zonder dat er een verschil in toonhoogte is. Time-scaling kan op verschillende manieren gebeuren. Algemeen worden de algoritmes opgedeeld in drie verschillende categorie\"{e}n: Time domain, Phase-vocoder en signal models. [1]. In dit verslag wordt enkel tijdsdomein algoritmes besproken, meer bepaald OLA (\textit{Overlap and Add}), SOLA (\textit{Synchronous Overlap and Add}) en PSOLA (\textit{Pitch-Synchronous Overlap and Add}). Het basisidee  van dit algoritme is eerst het splitsen in overlappende frames van het signaal en het daarna hercombineren van deze frames met telkens een bepaalde overlap om een output signaal te geven. Ten slotte worden deze algoritmes verder aangepast, zodat de time scaling ook in real time kan gebeuren.
 
