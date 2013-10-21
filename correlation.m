@@ -23,20 +23,24 @@
 
 %     for i = 1:num_offsets
 %         offset = offsets(i);
-
 %     end
 % end
 
+function [offsets, corr] = correlation(signal1, signal2, max_left_shift, max_right_shift)
+    % Computes and returns the cross correlation function of the given signals,
+    % shifting the second signal left to a max of 'max_left_shift' samples, and 
+    % right to a max of 'max_right_shift' samples.
 
-function corr = correlation(signal1, signal2)
-    % Calculates the cross correlation of the two given input signals via the formula
-    % (1) given in the assignment document.
-
-    % signal1, signal2      'x_L1', 'x_L2' in (1). Should be row-vectors.
-
-    L = size(signal1, 1);
-    corr = zeros(1, n);
-    for m = 1:L
-        corr(m) = sum(signal1(1:(L-m+1)) .* signal2(m:end)) / L;
-    end
+    % Row vector containing the x-axis values of the correlation function,
+    % determining by how many samples the second signal is shifted à propos the first.
+    % Negative values shift the second signal backwards, positive forwards.
+    offsets = -max_left_shift:max_right_shift;
+    % Number of values (offsets) for which the correlation function is evaluated.
+    num_offsets = max(size(offsets));
+    % Row vector containing the correlation function.
+    % Evaluate cross correlation function (eq. 1 in assignment document) for each point of the overlap.
+    % We start by shifting the second signal to the right.
+    left_shift = correlation_only_shift_fwd(signal2, signal1, max_left_shift);
+    right_shift = correlation_only_shift_fwd(signal1, signal2, max_right_shift);
+    corr = [left_shift(end-1:-1:1) right_shift];
 end
