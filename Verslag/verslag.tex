@@ -21,17 +21,16 @@
 \tableofcontents
 
 \chapter{Inleiding}
-\label{references} 
+
 Wanneer geluid wordt opgenomen is het soms handig om de opname te versnellen of te vertragen. Dit heeft tal van toepassingen, zoals bij het presenteren van het nieuws of bij het ‘beatmatchen’ van muzieknummers voor een dj. Een nieuwsanker moet veel informatie geven binnen een bepaalde tijdsspanne en af en toe gaat dit ten koste van de verstaanbaarheid. Het kan dus nuttig zijn om te snelle spraak te vertragen. Deze techniek wordt eveneens toegepast bij live muzikale optredens om op de maat te spelen.
 Dit gebeurt ook wanneer het geluid bij een beeld moet gezet worden, wanneer ze niet samen zijn opgenomen. Een andere toepassing is om teksten die in een normaal tempo zijn voorgelezen te versnellen zodat blinden, die een verscherpt gehoor hebben, ook boeken kunnen 'lezen'. Het omgekeerde gebeurt voor mensen die een vreemde taal leren. [1],[2]
 \cite{Thesis}
+ 
 
 Als het geluid sneller of trager wordt afgespeeld door het veranderen van de bemonsteringsfrequentie, zal de toon hoger of later gaan klinken. Via \textit{time scaling} of \textit{time stretching} kan men een audiosignaal versnellen of vertragen zonder dat er een verschil in toonhoogte is. Time-scaling kan op verschillende manieren gebeuren. Algemeen worden de algoritmes opgedeeld in drie verschillende categorie\"{e}n: Time domain, Phase-vocoder en signal models. [1]. In dit verslag wordt enkel tijdsdomein algoritmes besproken, meer bepaald OLA (\textit{Overlap and Add}), SOLA (\textit{Synchronous Overlap and Add}) en PSOLA (\textit{Pitch-Synchronous Overlap and Add}). Het basisidee  van dit algoritme is eerst het splitsen in overlappende frames van het signaal en het daarna hercombineren van deze frames met telkens een bepaalde overlap om een output signaal te geven. Ten slotte worden deze algoritmes verder aangepast, zodat de time scaling ook in real time kan gebeuren.
 
 \chapter{Time Stretching Algoritmes}
-
 \section{Introductie}
-%Gaan we nog met hoofdstukken werken?
 Hoofdstuk 2 beschrijft de verschillende algoritmes voor het versnellen en vertragen van geluidsbestanden. Het hoofdstuk begint met het beschrijven van de \textit{sample rate conversion}, een slechte methode, en gaat verder met de OLA-methode (\textit{Overlap and Add}), het eenvoudigste algoritme. Vervolgens beschrijft deze tekst het SOLA-algoritme (\textit{Synchronous Overlap and Add}), wat het OLA-principe verbetert door de maximaal overeenkomende overlap te zoeken tussen de opeenvolgende frames. Een nog verbeterde versie van dit algoritme is het PSOLA (\textit{Pith-Synchronous Overlap and Add}), die gebruik maakt van de pith of toonhoogte van het signaal. Daarna wordt er een vergelijking gemaakt tussen deze algoritmes door het signaal te plotten en de frequentiespectra te vergelijking en deze te laten beoordelen in een enquete. 
 
 
@@ -45,14 +44,15 @@ Methodes als OLA, SOLA en PSOLA veranderen de snelheid van de geluidssignalen zo
 
 \section{Overlap and Add (OLA)}
 \subsection{Concept}
-Een zeer eenvoudig time stretching algoritme is het geluidssignaal te verdelen in overlappende deeltjes van een vaste lengte N. Deze originele fragmenten worden opgeschoven met een tijdsverschuiving van $ S_{a}$ samples. Vervolgens  \textbf{worden}  de blokjes gepositioneerd met een tijdsverschuiving van $S_{s}$ = $\alpha$.$S_{a}$, waarbij $\alpha$ een variabele is die vrij gekozen mag worden. Alpha is de variabele die bepaalt in welke mate het geluidsfragment vertraagd of versneld wordt en ligt typisch ...  \textbf{binnen een bepaald interval...)} 
+\label{subsec:OLA_concept}
+Een zeer eenvoudig time stretching algoritme is het geluidssignaal te verdelen in overlappende deeltjes van een vaste lengte N. Deze originele fragmenten worden opgeschoven met een tijdsverschuiving van $ S_{a}$ samples. Vervolgens  \textbf{worden}  de blokjes gepositioneerd met een tijdsverschuiving van $S_{s}$ = $\alpha$.$S_{a}$, waarbij $\alpha$ een variabele is die vrij gekozen mag worden. De variabele $\alpha$ bepaalt in welke mate het geluidsfragment vertraagd of versneld wordt en ligt typisch tussen nul en 1/(1 - percentage overlap) omdat het outputsignaal anders gaten bevat. 
 
 \textbf{FIGUUR MOET NOG GEHERPOSITIONEERD WORDEN}
 
 \begin{figure}
 \centering
 \includegraphics[width=\textwidth]{ola}
-\caption{Principe van het OLA-algoritme}
+\caption{Principe van het OLA-algoritme.}
 \label{fig:OLA}
 \end{figure}
 
@@ -61,18 +61,19 @@ Door deze verschuiving overlappen kleine delen van de opeenvolgende fragmenten e
 \subsection{Uitwerking}
 {\footnotesize \textit{\textbf{Bijlage A ???} bevat de volledige MATLAB-code voorzien van toelichting.}}\\
 
-\noindent Deze paragraaf geeft een beschrijving van de implementatie van het OLA-algoritme in \verb+MATLAB+. De OLA-functie gebruikt vijf argumenten, waarvan het eerste verwijst naar het geluidssignaal dat ingeladen moet worden.
+\noindent Deze paragraaf geeft een beschrijving van de implementatie van het OLA-algoritme in \verb+MATLAB+. De OLA-functie gebruikt vijf argumenten \cref{eq:OLA_functie}, waarvan het eerste verwijst naar het geluidssignaal dat ingeladen moet worden. Het tweede argument \verb+sample_rate+ staat voor het aantal frames per seconde waaruit het geluidssignaal bestaat en heeft een standaardwaarde van 44.100 frames/s. Het derde en laatste argument hebben dezelfde betekenis als in \cref{subsec:OLA_concept}, en hebben een defaultwaarde van respectievelijk 0,5 en 1,5. \verb+fps+ (standaard tien) verwijst naar het aantal frames per seconde en bepaalt in hoeveel frames het inputsignaal opgedeeld wordt.
+
+\textbf{REFERENTIE WERKT NIET JUIST.}
 \begin{verbatim}
+\label{eq:OLA_functie}
 function timeshifted_signal = timeshift_OLA(filename, sample_rate,
 		                              overlap, fps, alpha)		                           
 \end{verbatim}
-De sample-rate staat voor het aantal frames per seconde waaruit het geluidssignaal bestaat en staat standaard op 44100. \textbf{DIT MOET ER EIGENLIJK NIET BIJ}
-\\
-\\
 Het OLA-algoritme bestaat uit drie grote delen. Het eerste deel laadt het audiosignaal binnen en splitst het simpelweg in twee kanalen, een linker- en een rechtersignaal. Een audiosignaal is namelijk een vector van dimensie \verb+nx2+, waarbij het aantal rijen \verb+n+ afhankelijk is van de lengte van de opname. De twee kolommen stelt het geluid voor van respectievelijk het linker- en rechtersignaal. Het programma  past verder apart de code toe op beide signalen.\\
-
-In een tweede gedeelte worden zowel het linker- als het rechtersignaal opgesplitst in frames van een vaste lengte \verb+frame_size+. De lengte \verb+frame_size+ is gelijk aan de \verb+sample_rate+ (het aantal samples per seconde) gedeeld door de \verb+fps+ (het aantal frames per seconde) en heeft als eenheid samples per frame. Het algoritme gebruikt voor het opdelen van het audiosignaal een apart geschreven functie \verb+make_frames+ (cfr. \cref{sec:bijlageA}), waarvan ook het SOLA-algoritme gebruik maakt. De functie \verb+make_frames+ heeft als output een lijst \verb+frames+ waarvan elke rij de data bevat voor \'e\'en van de aparte opgesplitste fragmenten. Om deze aparte fragmenten aan te maken, hanteert de functie een \verb+for+-lus. Concreet zorgt array-slicing van het inputsignaal \textbf{(juiste terminologie?)} in elke \verb+for+-lus voor de aanmaak van een fragment.  Hierbij wordt meteen rekening gehouden met de gewilde overlap en dus zullen het begin en einde van opeenvolgende frames dezelfde data bevatten. Standaard staat de overlap op 50\%, wat inhoudt dat de tweede helft van een eerste frame volledig dezelfde data bevat als de eerste helft van het daaropvolgende frame (zie ook \cref{fig:OLA}). Belangrijk is dat het algoritme bij de \verb+for+-lus het concept preallocatie toepast.
-Preallocatie houdt in dat \textbf{je} op voorhand de juiste lengte bepaalt van de lijst waarvan in elke \verb+for+-lus informatie wordt toegevoegd. Zo wordt tijdens elke iteratie de elementen van de lijst overschreven met deze informatie in plaats van toegevoegd zonder dat de lengte van de lijst verandert. Specifiek gaat het hier om de outputlijst \verb+frames+. Deze lijst heeft voor de lus enkel nullen, die elke iteratie overschreven worden met de data van \'e\'en afgesplitst fragment. De snelheid van het algoritme verhoogt hierdoor aanzienlijk; het duurt niet langer 15 seconden om het programma uit te voeren, maar slechts 0,3 seconden.\\
+\\
+In een tweede gedeelte worden zowel het linker- als het rechtersignaal opgesplitst in frames van een vaste lengte \verb+frame_size+. De lengte \verb+frame_size+ is gelijk aan de \verb+sample_rate+ (het aantal samples per seconde) gedeeld door de \verb+fps+ (het aantal frames per seconde) en heeft als eenheid samples per frame. Het algoritme gebruikt voor het opdelen van het audiosignaal een apart geschreven functie \verb+make_frames+ (cfr. \cref{sec:bijlageA}), waarvan ook het SOLA-algoritme gebruik maakt. \\
+De functie \verb+make_frames+ heeft als output een lijst \verb+frames+ waarvan elke rij de data bevat voor \'e\'en van de aparte opgesplitste fragmenten. Om deze aparte fragmenten aan te maken, hanteert de functie een \verb+for+-lus. Concreet zorgt array-slicing van het inputsignaal \textbf{(juiste terminologie?)} in elke \verb+for+-lus voor de aanmaak van een fragment.  Hierbij wordt meteen rekening gehouden met de gewilde overlap en dus zullen het begin en einde van opeenvolgende frames dezelfde data bevatten. Standaard staat de overlap op 50\%, wat inhoudt dat de tweede helft van een eerste frame volledig dezelfde data bevat als de eerste helft van het daaropvolgende frame (zie ook \cref{fig:OLA}).\\
+Belangrijk is dat het algoritme bij de \verb+for+-lus het concept preallocatie toepast. Preallocatie houdt in dat \textbf{je} op voorhand de juiste lengte bepaalt van de lijst waarvan in elke \verb+for+-lus informatie wordt toegevoegd. Zo wordt tijdens elke iteratie de elementen van de lijst overschreven met deze informatie in plaats van toegevoegd zonder dat de lengte van de lijst verandert. Specifiek gaat het hier om de outputlijst \verb+frames+. Deze lijst heeft voor de lus enkel nullen, die elke iteratie overschreven worden met de data van \'e\'en afgesplitst fragment. De snelheid van het algoritme verhoogt hierdoor aanzienlijk; het duurt niet langer 15 seconden om het programma uit te voeren, maar slechts 0,3 seconden.\\
 \\
 Het derde en laatste deel bestaat erin om de opgesplitste fragmenten, aanwezig in de lijst \verb+frames+ (of \verb+frames_left+ en \verb+frames_right+???), te recombineren, wat resulteert in de outputlijst \verb+timeshifted_signal+ die de data voor het tijdsverschoven geluidssignaal bevat. Dit deel omvat nogmaals een \verb+for+-lus, waarbij ook hier preallocatie wordt toegepast. Concreet \textbf{worden} er tijdens elke iteratie twee indices bijgehouden, \verb+index1+ en \verb+index2+. 
 \textit{ 'index1' is the index in the output signal where the overlap with the next-to-be-added frame (framel/framer) starts.
@@ -80,14 +81,11 @@ Het derde en laatste deel bestaat erin om de opgesplitste fragmenten, aanwezig i
 
 
 \paragraph{Fade-in en fade-out:} Het algoritme werkt nu reeds "degelijk" maar een verbetering zou zijn om ...
-\subsection{Interpretatie}
-Positieve punten:
-beter dan resample.
-geen verandering van de toonhoogte.
 
-Negatieve punten:
-- veel ruis zeker als geen crossfade functie.
-maar OLA maakt geen gebruik van de inhoud van de data/informatie over de pitch enzovoort, het past het algoritme op alle data toe...
+\subsection{Interpretatie}
+Het Overlap and Add principe houdt reeds een aanzienlijke verbetering in t.o.v. de ingebouwde \verb+resample+-functie van \verb+MATLAB+. Zo vertraagt en versnelt het geluidssignalen zonder de toonhoogte te veranderen, wat resulteert in een natuurlijker outputsignaal. \textbf{zie grafiek NIKKI}\\
+Het bevat echt nog een aantal negatieve punten. Zo lijkt het alsof er in het uitgangssignaal enkele klanken herhaald worden. Daarnaast vertoont het signaal vrij veel ruis, zeker indien het OLA-algoritme geen crossfade functie gebruikt. Maar een groter, conceptueel probleem is dat het OLA-algoritme de informatie die aanwezig is in de data van het geluidsfragment niet benut. Het past het algoritme als het ware blind toe, wat de data ook van informatie bevat. Een beter algoritme houdt rekening met de informatie in het geluiddsignaal, zoals de locatie van de pitch.
+
 
 \section{Synchronous Overlap and Add (SOLA)}
 \label{sec:SOLA}
@@ -145,22 +143,10 @@ We definiëren een sign {} dat een +1 of 0 teruggeeft afhankelijk van het feit d
 \begin{center}
 $ZCR=\frac{1}{N} \sum\limits_{n=0}^{N-1} |sign\{s(n)-sign\{s(n-1)\}\}|$
 \end{center}
-Door deze zero-crossing rate door 2 te delen bekomen we het aantal periodes van het signaal. De fundamentele frequentie van het signaal wordt berekend door de duur van het signaal hierdoor te delen.
 
-\subsubsection{verbetering}
-
-Echte signalen zullen vaak meerdere keren per halve periode van teken wisselen. Dit gebeurt omdat opgenomen signalen meestal een combinatie zijn van verschillende frequenties. Vaak zal er ook ruis op zitten, wat ook voor schommelingen rond nul kan zorgen.\\
-\\
-Om hiermee rekening te houden kan er een band rond de gemiddelde van de datapunten gedefineeerd worden. Dan wordt een analoog algoritme toegepast dat, in de plaats van te meten hoe veel keer er van teken wordt gewisseld, meet hoe veel keer deze band gekruist wordt.\\
-\\
-Zelfs met deze verbetering blijft het zero-crossing rate algoritme niet erg betrouwbaar omdat deze bandbreedte voor sommige golven heel precies bepaald moet worden. Als die te breed is kan het zijn dat bepaalde kleinere, maar toch relevante, pieken niet worden meegerekend. In het geval dat die te smal is zal ze haar gewenste effect niet hebben.
-
-
-\subsection{Pitch detectie met autocorrelatie}
-Een meer robuuste manier om pitch detectie uit te voeren is door gebruik te maken van de autocorrelatie van een signaal. De autocorrelatie is gelijkend op de kruiscorrelatie in \textbf{(?? verwijzing)}, maar bij de autocorrelatie wordt het algoritme toegepast op hetzelfde signaal. 
-Een venster van twee maal de lengte van de langste verwachtte periode wordt  gebruikt om accuraat de pitch te bepalen. Bij een verschuiving gelijk aan een periode zal de waarde van de autocorrelatie functie een maximum bereiken. Aan de hand hiervan kan de fundamentele frequentie berekend worden.\\
-\\
-Deze methode is robuster dan het zero-crossing rate algoritme. Dit komt omdat de corrolatie functie over een groot aantal datapunten wordt berekend. Hierdoor blijft de effect van uitbijters en kleine schommelingen beperkt. De enige moeilijkheid verbonden met dit methode is bepalen hoe groot de waarde van de autocorrelatie functie moet zijn om te kunnen veronderstellen dat het signaal een periode verschoven is.
+\subsection{Pitch detectie met auto-correlatie}
+Een meer robuuste manier om pitch detectie uit te voeren is door gebruik te maken van de autocorrelatie van een signaal. De autocorrelatie is gelijkend op de kruiscorrelatie in (?? verwijzing), maar bij de autocorrelatie wordt het algoritme toegepast op hetzelfde signaal. 
+Een venster van twee maal de lengte van de langste periode wordt  gebruikt om accuraat de pitch te bepalen. Als de shift in de auto-correlatie functie de fundamentele frequentie, bereikt de autocorrelatie een maximum. Dit maximum kan beschouwd worden als de pitch periode. Zo is het mogelijk om de pitch periode te bepalen van het signaal. 
 
 %Code bekijken en verder aanvullen
 
@@ -176,15 +162,19 @@ In het implementeren van de voorgaande algoritmes werd steeds gebruikt gemaakt v
 
 \chapter{Werkwijze en vakintegratie}
 \section{Werkwijze}
-Elke P\&O zitting beginnen we met een korte vergadering. Hierin bespreken we eerst de eventuele huistaken en hoe deze verlopen zijn. Dan passen we indien nodig de  algemene planning aan en stellen we de dagplanning op met de taakverdeling. Dit gebeurt in Asana, een handige webinterface diealle projecttaken makkelijk laat inplannen. Vervolgens maken we via Instagantt een Gant-chart voor een duidelijk overzicht. 
+Elke P\&O zitting begint met een korte vergadering. Hierin bespreken we eerst de eventuele huistaken en hoe deze verlopen zijn. Dan passen we indien nodig de  algemene planning aan en stellen we de dagplanning op met de taakverdeling. Dit gebeurt in Asana, een handige webinterface diealle projecttaken makkelijk laat inplannen. Vervolgens maken we via Instagantt een Gant-chart voor een duidelijk overzicht. 
 Als er moet geprogrammeerd worden proberen we in groepjes van twee te werken. Volgens het ‘Pair Programming’-systeem kan dan één persoon de code typen en de andere kijkt onmiddellijk na op fouten. 
 \section{Vakintegratie}
 
 Bij dit project wordt de kennis uit verschillende vakken toegepast. Het project werkt met geluid. Een matrix stelt het geluid voor. Bewerkingen op matrices werd aangeleerd in het vak toegpaste algebra. Het frequentiespectrum kan berekend worden door een fourier transformatie. Dit werd gezien in het vak Informatie-Overdracht en Verwerking en in Elektrische Netwerken. Het schrijven van de algoritmes in Matlab vergt kennis opgedaan uit het vak methodiek van de informatica. In de algoritmes wordt ook gebruikt gemaakt van een crosscorrelatie die werkt met een convolutie. Dit staat uitgelegd in de cursus Algebra en Analyse. Daarnaast wordt de kennis van PenO 1 en 2 toegepast in de vergaderingen. 
+>>>>>>> lay out verslag aangepast en references.bib toegevoegd
 
 \chapter{Besluit}
-Resampling is een slechte manier om geluid te versnellen en vertragen omdat het zorgt voor een verschuiving in toonhoogte. Een betere manier is om gebruik te maken van OLA. Deze splitst het signaal op in overlappende delen en combineert deze met een vaste overlap. Een crossfade functie kan toegevoegd worden om het algoritme te verbeteren. SOLA gaat na welke overlapping de maximale overeenkomsten vertoont en zal zo overlappen. PSOLA maakt gebruik van pith detection om ?????????NOG VERDER AANVULLEN. Een vervolg bestaat erin het beste algoritme, PSOLA, te implementeren in Simulink om zo in real time geluid te kunnen vertragen. 
-%besluit nog verder aanvullen
+
+
+
+
+
 
 
 \chapter{Bijlages}
@@ -241,6 +231,7 @@ Wat moet er zeker in het verslag?
 \item interpretatie?
 \item Foto's op de juiste plaats zien te krijgen.
 \item zien wat er niet mee upgedatet is.
+\item zien dat de indent bij elke paragraaf consistent is.
 
 \end{itemize}
 
