@@ -156,9 +156,11 @@ Om hiermee rekening te houden kan er een band rond de gemiddelde van de datapunt
 Zelfs met deze verbetering blijft het zero-crossing rate algoritme niet erg betrouwbaar omdat deze bandbreedte voor sommige golven heel precies bepaald moet worden. Als die te breed is kan het zijn dat bepaalde kleinere, maar toch relevante, pieken niet worden meegerekend. In het geval dat die te smal is zal ze haar gewenste effect niet hebben.
 
 
-\subsection{Pitch detectie met auto-correlatie}
+\subsection{Pitch detectie met autocorrelatie}
 Een meer robuuste manier om pitch detectie uit te voeren is door gebruik te maken van de autocorrelatie van een signaal. De autocorrelatie is gelijkend op de kruiscorrelatie in \textbf{(?? verwijzing)}, maar bij de autocorrelatie wordt het algoritme toegepast op hetzelfde signaal. 
-Een venster van twee maal de lengte van de langste verwachtte periode wordt  gebruikt om accuraat de pitch te bepalen. Bij een verschuiving gelijk aan een periode zal de waarde van de auto-correlatie functie een maximum bereiken. Aan de hand hiervan kan de frequentie berekend worden.
+Een venster van twee maal de lengte van de langste verwachtte periode wordt  gebruikt om accuraat de pitch te bepalen. Bij een verschuiving gelijk aan een periode zal de waarde van de autocorrelatie functie een maximum bereiken. Aan de hand hiervan kan de fundamentele frequentie berekend worden.\\
+\\
+Deze methode is robuster dan het zero-crossing rate algoritme. Dit komt omdat de corrolatie functie over een groot aantal datapunten wordt berekend. Hierdoor blijft de effect van uitbijters en kleine schommelingen beperkt. De enige moeilijkheid verbonden met dit methode is bepalen hoe groot de waarde van de autocorrelatie functie moet zijn om te kunnen veronderstellen dat het signaal een periode verschoven is.
 
 %Code bekijken en verder aanvullen
 
