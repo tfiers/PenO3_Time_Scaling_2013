@@ -2,6 +2,13 @@
 \usepackage{cleveref}
 \usepackage[dutch]{babel}
 \usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage{titlesec, blindtext, color}
+\definecolor{gray75}{gray}{0.75}
+\newcommand{\hsp}{\hspace{20pt}}
+\titleformat{\chapter}[hang]{\Huge\bfseries}{\thechapter\hsp\textcolor{gray75}{|}\hsp}{0pt}{\Huge\bfseries}
+\usepackage[top=1in, bottom=1.25in, left=1.25in, right=1.25in]{geometry}
+
 
 
 % Uncomment dit om comments te renderen in de pdf.
@@ -10,17 +17,19 @@
 
 \begin{document}
 
+
 \tableofcontents
 
-\chapter*{Inleiding}
+\chapter{Inleiding}
 
 Wanneer geluid wordt opgenomen is het soms handig om de opname te versnellen of te vertragen. Dit heeft tal van toepassingen, zoals bij het presenteren van het nieuws of bij het ‘beatmatchen’ van muzieknummers voor een dj. Een nieuwsanker moet veel informatie geven binnen een bepaalde tijdsspanne en af en toe gaat dit ten koste van de verstaanbaarheid. Het kan dus nuttig zijn om te snelle spraak te vertragen. Deze techniek wordt eveneens toegepast bij live muzikale optredens om op de maat te spelen.
 Dit gebeurt ook wanneer het geluid bij een beeld moet gezet worden, wanneer ze niet samen zijn opgenomen. Een andere toepassing is om teksten die in een normaal tempo zijn voorgelezen te versnellen zodat blinden, die een verscherpt gehoor hebben, ook boeken kunnen 'lezen'. Het omgekeerde gebeurt voor mensen die een vreemde taal leren. [1],[2]
-%verwijzingen moeten nog toegevoegd worden. 
+\cite{Thesis}
+ 
 
 Als het geluid sneller of trager wordt afgespeeld door het veranderen van de bemonsteringsfrequentie, zal de toon hoger of later gaan klinken. Via \textit{time scaling} of \textit{time stretching} kan men een audiosignaal versnellen of vertragen zonder dat er een verschil in toonhoogte is. Time-scaling kan op verschillende manieren gebeuren. Algemeen worden de algoritmes opgedeeld in drie verschillende categorie\"{e}n: Time domain, Phase-vocoder en signal models. [1]. In dit verslag wordt enkel tijdsdomein algoritmes besproken, meer bepaald OLA (\textit{Overlap and Add}), SOLA (\textit{Synchronous Overlap and Add}) en PSOLA (\textit{Pitch-Synchronous Overlap and Add}). Het basisidee  van dit algoritme is eerst het splitsen in overlappende frames van het signaal en het daarna hercombineren van deze frames met telkens een bepaalde overlap om een output signaal te geven. Ten slotte worden deze algoritmes verder aangepast, zodat de time scaling ook in real time kan gebeuren.
 
-\chapter*{Time Stretching Algoritmes}
+\chapter{Time Stretching Algoritmes}
 
 \section{Introductie}
 %Gaan we nog met hoofdstukken werken?
@@ -147,19 +156,27 @@ Een venster van twee maal de lengte van de langste periode wordt  gebruikt om ac
 
 
 
-\chapter*{Real-time implementatie}
+\chapter{Real-time implementatie}
 In het implementeren van de voorgaande algoritmes werd steeds gebruikt gemaakt van reeds opgenomen signalen, waarvan de karakteristieken gekend waren. In real-time-implementatie zijn de signaal karakteristieken ongekend en veranderen ze doorheen de tijd. Het signaal kan niet versneld worden omdat er niet in de toekomst kan gekeken worden en de daarna komende frames niet gekend zijn. Het signaal vertragen kan echter wel, omdat er stukjes van het gekende signaal moeten herhaald worden. Dit is de volgende stap die nog verder uitgewerkt moet worden in de volgende teamzittingen. Dit zal gebeuren in simulink. Wanneer het algoritme in simulink werkt, wordt het samengevoegd met de wim de vilder filter, die gemaakt werd door een ander team, om de ademhalingsruis eruit te halen.
 
-\chapter*{Werkwijze en vakintegratie}
+\chapter{Werkwijze en vakintegratie}
 \section{Werkwijze}
 
+<<<<<<< HEAD
 Elke P\&O zitting beginnen we met een korte vergadering. Hierin bespreken we eerst de eventuele huistaken en hoe deze verlopen zijn. Dan passen we indien nodig de  algemene planning aan en stellen we de dagplanning op met de taakverdeling. Dit gebeurt in Asana, een handige webinterface diealle projecttaken makkelijk laat inplannen. Vervolgens maken we via Instagantt een Gant-chart voor een duidelijk overzicht. 
 Als er moet geprogrammeerd worden proberen we in groepjes van twee te werken. Volgens het ‘Pair Programming’-systeem kan dan één persoon de code typen en de andere kijkt onmiddellijk na op fouten. 
 \section{Vakintegratie}
 
 Bij dit project wordt de kennis uit verschillende vakken toegepast. Het project werkt met geluid. Een matrix stelt het geluid voor. Bewerkingen op matrices werd aangeleerd in het vak toegpaste algebra. Het frequentiespectrum kan berekend worden door een fourier transformatie. Dit werd gezien in het vak Informatie-Overdracht en Verwerking en in Elektrische Netwerken. Het schrijven van de algoritmes in Matlab vergt kennis opgedaan uit het vak methodiek van de informatica. In de algoritmes wordt ook gebruikt gemaakt van een crosscorrelatie die werkt met een convolutie. Dit staat uitgelegd in de cursus Algebra en Analyse. Daarnaast wordt de kennis van P\&O 1 en 2 toegepast in de vergaderingen. 
+=======
+Elke PenO zitting beginnen we met een korte vergadering. Hierin bespreken we eerst de eventuele huistaken en hoe deze verlopen zijn. Dan passen we indien nodig de  algemene planning aan en stellen we de dagplanning op met de taakverdeling. Dit gebeurt in Asana, een handige webinterface diealle projecttaken makkelijk laat inplannen. Vervolgens maken we via Instagantt een Gant-chart voor een duidelijk overzicht. 
+Als er moet geprogrammeerd worden proberen we in groepjes van twee te werken. Volgens het ‘Pair Programming’-systeem kan dan één persoon de code typen en de andere kijkt onmiddellijk na op fouten. 
+\section{Vakintegratie}
 
-\chapter*{Besluit}
+Bij dit project wordt de kennis uit verschillende vakken toegepast. Het project werkt met geluid. Een matrix stelt het geluid voor. Bewerkingen op matrices werd aangeleerd in het vak toegpaste algebra. Het frequentiespectrum kan berekend worden door een fourier transformatie. Dit werd gezien in het vak Informatie-Overdracht en Verwerking en in Elektrische Netwerken. Het schrijven van de algoritmes in Matlab vergt kennis opgedaan uit het vak methodiek van de informatica. In de algoritmes wordt ook gebruikt gemaakt van een crosscorrelatie die werkt met een convolutie. Dit staat uitgelegd in de cursus Algebra en Analyse. Daarnaast wordt de kennis van PenO 1 en 2 toegepast in de vergaderingen. 
+>>>>>>> lay out verslag aangepast en references.bib toegevoegd
+
+\chapter{Besluit}
 
 
 
@@ -167,14 +184,15 @@ Bij dit project wordt de kennis uit verschillende vakken toegepast. Het project 
 
 
 
-\chapter*{Bijlages}
+\chapter{Bijlages}
 \section{Bijlage A}
 \label{sec:bijlageA}
 
 \section{Bijlage B}
 
 
-
+\bibliographystyle{plain}
+\bibliography{references}
 
 \chapter{Tijdelijke Commentaar}
 
@@ -228,4 +246,3 @@ Wat moet er zeker in het verslag?
 
 
 \end{document}
-
