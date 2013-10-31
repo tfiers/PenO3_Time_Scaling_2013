@@ -15,10 +15,8 @@ function timeshifted_signal = timeshift_OLA(filename, sample_rate, overlap, fps,
     %               stretching. alpha in (0,1) speeds up the signal, alpha
     %               in (1,2) slows it down. Alpha must be smaller than 1/(1-overlap),
     %               (else there would be gaps in the output signal.)
-
     
-    
-    tic % For measuring how long this function took to complete.
+    tic % For measuring execution time.
     
     % Provide default argument values.
     if nargin == 0 % Number of arguments in.
@@ -67,7 +65,7 @@ function timeshifted_signal = timeshift_OLA(filename, sample_rate, overlap, fps,
         framer = frames_right(i,:);
         % 'index1' is the index in the output signal where the overlap with the next-to-be-added frame (framel/framer) starts.
         index1  = (i-1) * time_shift;
-        % 'index2' is the index of the last sample in the output singal, where the overlap stops of course.
+        % 'index2' is the index of the last sample in the output signal, where the overlap stops of course.
         index2 = size(timeshifted_signal, 2);
         % The sample at index1 itself is also overlapping, thus + 1
         length_overlap = index2 - index1 + 1;
