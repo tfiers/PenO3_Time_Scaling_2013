@@ -1,5 +1,5 @@
-function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fps, alpha)
-    % Speeds up/slows down audio with Pitch-Synchronous Overlap and Add (SOLA).
+function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fps, alpha, window_overlap)
+    % Speeds up/slows down audio with Pitch-Synchronous Overlap and Add (PSOLA).
     
     % filename      A string giving the absolute or relative path of a .wav
     %               file. E.g. 'Speech Materials\annelies1.wav' or
@@ -30,6 +30,9 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
     %avoid the effects of outliers.
     MARGIN_OF_ERROR_FOR_MAXIMUM = 2;
     
+    %Number of peaks per Hanning-window
+    PEAKS_PER_WINDOW = 2;
+    
     input = audioread(filename); % Load audio file.
     input_left = input(:, 1); % Split channels (for stereo audio)
     input_right = input(:, 2); % We assume the input is nx2.
@@ -42,8 +45,7 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
     number_of_frames = size(frames_left, 1);
     frame_size = size(frames_left, 2);
     
-    % Pitch detection per frame. (Only on the right frame for now.)(Needs
-    % optimization!)
+    % Pitch detection per frame.
     for i=1:number_of_frames
         pitch(i,1) = autoCorrelation(frames_right(i,:), sample_rate);
         
@@ -59,18 +61,35 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
             end
         end
         
+        %Define pitchmarks
+        
+        pitchmarks = zeros(0, frame_size);
+        
         %Define upcoming peaks
         for j=max_average_value_index:sample_rate/pitch(i,1):frame_size
+        
+            pitchmarks(1,j) = 1;
             
         end
         %Define previous peaks
         for j=max_average_value_index:-sample_rate/pitch(i,1):1
+            
+            pitchmarks(1,j) = 1;
+            
         end
+        
+        %Make smaller windows
+        Hanning_windows_left = make_frames(frames_left(i,:)', sample_rate, window_overlap, pitch/PEAKS_PER_WINDOW);
+        Hanning_windows_right = make_frames(frames_right(i,:)', sample_rate, window_overlap, pitch/PEAKS_PER_WINDOW);
+        window_pitchmarks = make_frames(pitchmarks', sample_rate, window_overlap, pitch/PEAKS_PER_WINDOW);
+        
+        %Conevert to Hanning windows
+        Hanning_windows_left = Hanning_windows_left*hann(size(Hanning_windows_left,2));
+        Hanning_windows_right = Hanning_windows_right*hann(size(Hanning_windows_right,2));
         
     end
     
-    %Define pitchmarks
-    
+    timeshifted_signal = Hanning_windows_left;
     
 end
 

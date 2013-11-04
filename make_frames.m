@@ -24,7 +24,7 @@ function frames = make_frames(input, sample_rate, overlap, fps)
     % (1-overlap) gives 0.8 for an overlap of e.g. 0.2
     time_shift = floor(frame_size * (1-overlap));
     % Number of frames we will make. Number of rows in the output matrix.
-    num_frames = floor(size(input, 1) / time_shift);
+    num_frames = floor(size(input, 1) ./ time_shift);
     % This is the eventual output.
     % Preallocate this large (with zeros) array for speed.
     frames = zeros(num_frames, frame_size); 
