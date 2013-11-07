@@ -22,9 +22,9 @@ function frames = make_frames(input, sample_rate, overlap, fps)
     % Sa in the assignment document.
     % Samples between each new frame.
     % (1-overlap) gives 0.8 for an overlap of e.g. 0.2
-    time_shift = floor(frame_size * (1-overlap));
+    time_shift = frame_size * (1-overlap);
     % Number of frames we will make. Number of rows in the output matrix.
-    num_frames = floor(size(input, 1) ./ time_shift);
+    num_frames = round(size(input, 1) ./ time_shift);
     % This is the eventual output.
     % Preallocate this large (with zeros) array for speed.
     frames = zeros(num_frames, frame_size); 
@@ -33,7 +33,7 @@ function frames = make_frames(input, sample_rate, overlap, fps)
         % The sample in the input signal where our next frame starts.
         % We do -1 +1 to start with input(1:...)
         % So for a time_shift of 4410, we'll get 1, 4411, 8821, ...
-        offset_from_start = (frame_number-1)*time_shift+1;
+        offset_from_start = round((frame_number-1)*time_shift+1);
         % Check whether there are enough samples left in the input signal to fill a whole frame.
         if offset_from_start+frame_size <= size(input, 1)
             % Overwrite zeros in new row with next frame.

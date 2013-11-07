@@ -47,7 +47,7 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
     
     % Pitch detection per frame.
     for i=1:number_of_frames
-        pitch(i,1) = autoCorrelation(frames_right(i,:), sample_rate);
+        pitch = autoCorrelation(frames_right(i,:), sample_rate);
         
         %Look for maximum value as that's definately a peak.
         max_average_value_index = 1+MARGIN_OF_ERROR_FOR_MAXIMUM;
@@ -66,15 +66,16 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
         pitchmarks = zeros(0, frame_size);
         
         %Define upcoming peaks
-        for j=max_average_value_index:sample_rate/pitch(i,1):frame_size
+        for j=max_average_value_index:sample_rate/pitch:frame_size
         
             pitchmarks(1,j) = 1;
             
         end
         %Define previous peaks
-        for j=max_average_value_index:-sample_rate/pitch(i,1):1
+        for j=max_average_value_index:-sample_rate/pitch:1
             
             pitchmarks(1,j) = 1;
+            first_pitchmark = j; %Used later to calculate the location of the final pitchmarks.
             
         end
         
@@ -84,12 +85,42 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
         window_pitchmarks = make_frames(pitchmarks', sample_rate, window_overlap, pitch/PEAKS_PER_WINDOW);
         
         %Conevert to Hanning windows
-        Hanning_windows_left = Hanning_windows_left*hann(size(Hanning_windows_left,2));
-        Hanning_windows_right = Hanning_windows_right*hann(size(Hanning_windows_right,2));
+        Hanning_windows_left = bsxfun(@times, hann(size(Hanning_windows_left,2))', Hanning_windows_left);
+        Hanning_windows_right = bsxfun(@times, hann(size(Hanning_windows_left,2))', Hanning_windows_right);
+       
+        %Define start and end indexes for the Hanning windows
+        window_indexes = zeros(size(Hanning_windows_left,2),2);
+        for j = 1:size(Hanning_windows_left,1)
+
+            window_indexes(j,1) = round((j-1)*(1-window_overlap)*alpha*size(Hanning_windows_left,2)+1);
+            window_indexes(j,2) = window_indexes(j,1) + size(Hanning_windows_left,2);
+            
+        end
+        
+        %The length of the final frame.
+        final_frame_size = round(alpha*frame_size);
+            
+        %Create array of final frame length with final pitchmarks
+        final_pitchmarks = zeros(1,final_frame_size);
+        for j = first_pitchmark:round(sample_rate*alpha/pitch):final_frame_size
+            
+            final_pitchmarks(1,j) = 1;
+            
+        end
+        
+        %The final frame
+        final_frame = zeros(size(final_pitchmarks,2)
+        
+        %Used to detect when we've reached the last pitchmark.
+        pitchmarks_to_go = sum(final_pitchmarks);
+        
+        for j = 1:size(final_pitchmarks,2)
+            
+        end
         
     end
     
-    timeshifted_signal = Hanning_windows_left;
+    timeshifted_signal = window_indexes;
     
 end
 
