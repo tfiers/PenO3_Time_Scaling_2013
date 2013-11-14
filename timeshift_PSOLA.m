@@ -114,6 +114,13 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
         %Used to detect when we've reached the last pitchmark.
         pitchmarks_to_go = sum(final_pitchmarks);
         
+        %For each pitchmark:
+        %-Find the two windows with the start and end indexes closest to
+        %the pitchmark.
+        %-Look for the closest pitchmark in those two windows.
+        %-Shift the window with the closest pitchmark untill the windows
+        %line-up.
+        %-Add the window to the final frame.
         for j = 1:size(final_pitchmarks,2)
             
         end
