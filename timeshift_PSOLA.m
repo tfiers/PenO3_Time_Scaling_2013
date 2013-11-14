@@ -109,19 +109,68 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
         end
         
         %The final frame
-        final_frame = zeros(size(final_pitchmarks,2)
+        final_frame = zeros(2,size(final_pitchmarks,2));
         
         %Used to detect when we've reached the last pitchmark.
         pitchmarks_to_go = sum(final_pitchmarks);
         
         %For each pitchmark:
         %-Find the two windows with the start and end indexes closest to
-        %the pitchmark.
+        %the pitchmark. The begin index must be before the pitchmark and 
+        %the end index must be after the pitchmark. (May be the same window.)
         %-Look for the closest pitchmark in those two windows.
         %-Shift the window with the closest pitchmark untill the windows
         %line-up.
         %-Add the window to the final frame.
         for j = 1:size(final_pitchmarks,2)
+            if final_pitchmarks(1,j) == 1
+                %Find the closest begin and end index
+                [~, window_before] = min(abs(bsxfun(@minus, window_indexes(:,2), j)));
+                [~, window_after] = min(abs(bsxfun(@minus, window_indexes(:,1), j)));
+                
+                %Make sure the closest end index is after j and the closest
+                %begin index is before j.
+                if window_indexes(window_before, 2) < j
+                    window_before = window_before + 1;
+                end
+                if window_indexes(window_after, 1) > j
+                    window_after = window_after - 1;
+                end
+                
+                %Find out how far away the closest pitchmarks are in both
+                %windows.
+                pitchmark_distance_before = inf;
+                pitchmark_distance_after = inf;
+                for k= 1:size(window_pitchmarks(window_before,:),2)
+                    %Both windows are of equal length.
+                    if window_pitchmarks(window_before, k) == 1 && abs(j - window_indexes(window_before, 1) - k) < abs(pitchmark_distance_before)
+                        pitchmark_distance_before = j - window_indexes(window_before, 1) - k + 1;
+                    end
+                    if window_pitchmarks(window_after, k) == 1 && abs(j - window_indexes(window_after, 1) - k) < abs(pitchmark_distance_after)
+                        pitchmark_distance_after = j - window_indexes(window_after, 1) - k + 1;
+                    end
+                end
+                
+                if(pitchmarks_to_go == 1)
+                    if abs(pitchmark_distance_before) > abs(pitchmark_distance_after)
+                        final_frame(1,window_indexes(window_after,1) + pitchmark_distance_after : size(final_frame, 2)) = final_frame(1,window_indexes(window_after,1) + pitchmark_distance_after : size(final_frame, 2)) + Hanning_windows_left(window_after, 1 : size(final_frame, 2) - window_indexes(window_after, 1) + 1);
+                        final_frame(2,window_indexes(window_after,1) + pitchmark_distance_after : size(final_frame, 2)) = final_frame(2,window_indexes(window_after,1) + pitchmark_distance_after : size(final_frame, 2)) + Hanning_windows_right(window_after, 1 : size(final_frame, 2) - window_indexes(window_after, 1) + 1);
+                    else
+                        final_frame(1,window_indexes(window_before,1) + pitchmark_distance_before : size(final_frame, 2)) = final_frame(1,window_indexes(window_before,1) + pitchmark_distance_before : size(final_frame, 2)) + Hanning_windows_left(window_before, 1 : size(final_frame, 2) - window_indexes(window_before, 1) + 1);
+                        final_frame(2,window_indexes(window_before,1) + pitchmark_distance_before : size(final_frame, 2)) = final_frame(2,window_indexes(window_before,1) + pitchmark_distance_before : size(final_frame, 2)) + Hanning_windows_right(window_before, 1 : size(final_frame, 2) - window_indexes(window_before, 1) + 1);
+                    end 
+                else
+                    if abs(pitchmark_distance_before) > abs(pitchmark_distance_after)
+                        final_frame(1,window_indexes(window_after,1) + pitchmark_distance_after : window_indexes(window_after,1) + pitchmark_distance_after + size(Hanning_windows_left, 2) - 1) = final_frame(1,window_indexes(window_after,1) + pitchmark_distance_after : window_indexes(window_after,1) + pitchmark_distance_after + size(Hanning_windows_left, 2) - 1) + Hanning_windows_left(window_after, :);
+                        final_frame(2,window_indexes(window_after,1) + pitchmark_distance_after : window_indexes(window_after,1) + pitchmark_distance_after + size(Hanning_windows_right, 2) - 1) = final_frame(2,window_indexes(window_after,1) + pitchmark_distance_after : window_indexes(window_after,1) + pitchmark_distance_after + size(Hanning_windows_right, 2) - 1) + Hanning_windows_right(window_after, :);
+                    else
+                        final_frame(1,window_indexes(window_before,1) + pitchmark_distance_before : window_indexes(window_before,1) + pitchmark_distance_before + size(Hanning_windows_left, 2) - 1) = final_frame(1,window_indexes(window_before,1) + pitchmark_distance_before : window_indexes(window_before,1) + pitchmark_distance_before + size(Hanning_windows_left, 2) - 1) + Hanning_windows_left(window_before, :);
+                        final_frame(2,window_indexes(window_before,1) + pitchmark_distance_before : window_indexes(window_before,1) + pitchmark_distance_before + size(Hanning_windows_right, 2) - 1) = final_frame(2,window_indexes(window_before,1) + pitchmark_distance_before : window_indexes(window_before,1) + pitchmark_distance_before + size(Hanning_windows_right, 2) - 1) + Hanning_windows_right(window_before, :);
+                    end 
+                end
+                
+                pitchmarks_to_go = pitchmarks_to_go - 1;
+            end
             
         end
         
