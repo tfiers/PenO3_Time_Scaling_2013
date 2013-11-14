@@ -45,6 +45,10 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
     number_of_frames = size(frames_left, 1);
     frame_size = size(frames_left, 2);
     
+    %Used to piece together the frames afterwards.
+    non_overlap = round(alpha * frame_size * (1-overlap));
+    index1 = 1;
+    
     % Pitch detection per frame.
     for i=1:number_of_frames
         pitch = autoCorrelation(frames_right(i,:), sample_rate);
@@ -63,19 +67,18 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
         
         %Define pitchmarks
         
-        pitchmarks = zeros(0, frame_size);
+        pitchmarks = zeros(1, frame_size);
         
         %Define upcoming peaks
         for j=max_average_value_index:sample_rate/pitch:frame_size
         
-            pitchmarks(1,j) = 1;
+            pitchmarks(1,round(j)) = 1;
             
         end
         %Define previous peaks
         for j=max_average_value_index:-sample_rate/pitch:1
-            
-            pitchmarks(1,j) = 1;
-            first_pitchmark = j; %Used later to calculate the location of the final pitchmarks.
+            pitchmarks(1,round(j)) = 1;
+            first_pitchmark = round(j); %Used later to calculate the location of the final pitchmarks.
             
         end
         
@@ -89,7 +92,7 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
         Hanning_windows_right = bsxfun(@times, hann(size(Hanning_windows_left,2))', Hanning_windows_right);
        
         %Define start and end indexes for the Hanning windows
-        window_indexes = zeros(size(Hanning_windows_left,2),2);
+        window_indexes = zeros(size(Hanning_windows_left,1),2);
         for j = 1:size(Hanning_windows_left,1)
 
             window_indexes(j,1) = round((j-1)*(1-window_overlap)*alpha*size(Hanning_windows_left,2)+1);
@@ -110,9 +113,6 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
         
         %The final frame
         final_frame = zeros(2,size(final_pitchmarks,2));
-        
-        %Used to detect when we've reached the last pitchmark.
-        pitchmarks_to_go = sum(final_pitchmarks);
         
         %For each pitchmark:
         %-Find the two windows with the start and end indexes closest to
@@ -141,42 +141,77 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
                 %windows.
                 pitchmark_distance_before = inf;
                 pitchmark_distance_after = inf;
-                for k= 1:size(window_pitchmarks(window_before,:),2)
-                    %Both windows are of equal length.
-                    if window_pitchmarks(window_before, k) == 1 && abs(j - window_indexes(window_before, 1) - k) < abs(pitchmark_distance_before)
-                        pitchmark_distance_before = j - window_indexes(window_before, 1) - k + 1;
+                %To cope with a window without pitchmarks.
+                while pitchmark_distance_before == inf && pitchmark_distance_after == inf
+                    for k= 1:size(window_pitchmarks(window_before,:),2)
+                        %Both windows are of equal length.
+                        if window_pitchmarks(window_before, k) == 1 && abs(j - window_indexes(window_before, 1) - k) < abs(pitchmark_distance_before)
+                            pitchmark_distance_before = j - window_indexes(window_before, 1) - k + 1;
+                        end
+                        if window_pitchmarks(window_after, k) == 1 && abs(j - window_indexes(window_after, 1) - k) < abs(pitchmark_distance_after)
+                            pitchmark_distance_after = j - window_indexes(window_after, 1) - k + 1;
+                        end
                     end
-                    if window_pitchmarks(window_after, k) == 1 && abs(j - window_indexes(window_after, 1) - k) < abs(pitchmark_distance_after)
-                        pitchmark_distance_after = j - window_indexes(window_after, 1) - k + 1;
+                    
+                    %For use in the next iteration if no pitchmark has been
+                    %found.
+                    if window_before ~= 1
+                        window_before = window_before - 1;
                     end
+                    if window_after ~= size(window_indexes, 1)
+                        window_after = window_after + 1;     
+                    end
+                    
                 end
                 
-                if(pitchmarks_to_go == 1)
-                    if abs(pitchmark_distance_before) > abs(pitchmark_distance_after)
-                        final_frame(1,window_indexes(window_after,1) + pitchmark_distance_after : size(final_frame, 2)) = final_frame(1,window_indexes(window_after,1) + pitchmark_distance_after : size(final_frame, 2)) + Hanning_windows_left(window_after, 1 : size(final_frame, 2) - window_indexes(window_after, 1) + 1);
-                        final_frame(2,window_indexes(window_after,1) + pitchmark_distance_after : size(final_frame, 2)) = final_frame(2,window_indexes(window_after,1) + pitchmark_distance_after : size(final_frame, 2)) + Hanning_windows_right(window_after, 1 : size(final_frame, 2) - window_indexes(window_after, 1) + 1);
+                if abs(pitchmark_distance_before) > abs(pitchmark_distance_after)
+                    %To avoid index out of bounds
+                    if (window_indexes(window_after,1) + pitchmark_distance_after + size(Hanning_windows_left, 2) - 1) > size(final_frame, 2)
+                        final_frame(1,window_indexes(window_after,1) + pitchmark_distance_after : size(final_frame, 2)) = final_frame(1,window_indexes(window_after,1) + pitchmark_distance_after : size(final_frame, 2)) + Hanning_windows_left(window_after, 1 : size(final_frame, 2) - window_indexes(window_after, 1) - pitchmark_distance_after + 1);
+                        final_frame(2,window_indexes(window_after,1) + pitchmark_distance_after : size(final_frame, 2)) = final_frame(2,window_indexes(window_after,1) + pitchmark_distance_after : size(final_frame, 2)) + Hanning_windows_right(window_after, 1 : size(final_frame, 2) - window_indexes(window_after, 1) - pitchmark_distance_after + 1);
                     else
-                        final_frame(1,window_indexes(window_before,1) + pitchmark_distance_before : size(final_frame, 2)) = final_frame(1,window_indexes(window_before,1) + pitchmark_distance_before : size(final_frame, 2)) + Hanning_windows_left(window_before, 1 : size(final_frame, 2) - window_indexes(window_before, 1) + 1);
-                        final_frame(2,window_indexes(window_before,1) + pitchmark_distance_before : size(final_frame, 2)) = final_frame(2,window_indexes(window_before,1) + pitchmark_distance_before : size(final_frame, 2)) + Hanning_windows_right(window_before, 1 : size(final_frame, 2) - window_indexes(window_before, 1) + 1);
-                    end 
-                else
-                    if abs(pitchmark_distance_before) > abs(pitchmark_distance_after)
                         final_frame(1,window_indexes(window_after,1) + pitchmark_distance_after : window_indexes(window_after,1) + pitchmark_distance_after + size(Hanning_windows_left, 2) - 1) = final_frame(1,window_indexes(window_after,1) + pitchmark_distance_after : window_indexes(window_after,1) + pitchmark_distance_after + size(Hanning_windows_left, 2) - 1) + Hanning_windows_left(window_after, :);
                         final_frame(2,window_indexes(window_after,1) + pitchmark_distance_after : window_indexes(window_after,1) + pitchmark_distance_after + size(Hanning_windows_right, 2) - 1) = final_frame(2,window_indexes(window_after,1) + pitchmark_distance_after : window_indexes(window_after,1) + pitchmark_distance_after + size(Hanning_windows_right, 2) - 1) + Hanning_windows_right(window_after, :);
+                    end
+                else
+                    %To avoid index out of bounds
+                    if (window_indexes(window_before,1) + pitchmark_distance_before + size(Hanning_windows_left, 2) - 1) > size(final_frame, 2)
+                        final_frame(1,window_indexes(window_before,1) + pitchmark_distance_before : size(final_frame, 2)) = final_frame(1,window_indexes(window_before,1) + pitchmark_distance_before : size(final_frame, 2)) + Hanning_windows_left(window_before, 1 : size(final_frame, 2) - window_indexes(window_before, 1) - pitchmark_distance_before + 1);
+                        final_frame(2,window_indexes(window_before,1) + pitchmark_distance_before : size(final_frame, 2)) = final_frame(2,window_indexes(window_before,1) + pitchmark_distance_before : size(final_frame, 2)) + Hanning_windows_right(window_before, 1 : size(final_frame, 2) - window_indexes(window_before, 1) - pitchmark_distance_before + 1);
                     else
                         final_frame(1,window_indexes(window_before,1) + pitchmark_distance_before : window_indexes(window_before,1) + pitchmark_distance_before + size(Hanning_windows_left, 2) - 1) = final_frame(1,window_indexes(window_before,1) + pitchmark_distance_before : window_indexes(window_before,1) + pitchmark_distance_before + size(Hanning_windows_left, 2) - 1) + Hanning_windows_left(window_before, :);
                         final_frame(2,window_indexes(window_before,1) + pitchmark_distance_before : window_indexes(window_before,1) + pitchmark_distance_before + size(Hanning_windows_right, 2) - 1) = final_frame(2,window_indexes(window_before,1) + pitchmark_distance_before : window_indexes(window_before,1) + pitchmark_distance_before + size(Hanning_windows_right, 2) - 1) + Hanning_windows_right(window_before, :);
-                    end 
-                end
+                    end
+                end 
                 
-                pitchmarks_to_go = pitchmarks_to_go - 1;
             end
             
         end
         
+        if i==1
+            timeshifted_signal = final_frame;
+        else
+            %Determine the length of the overlap
+            index1 = index1 + non_overlap;
+            index2 = size(timeshifted_signal, 2);
+            length_overlap = index2 - index1 +1;
+
+            % Generate a vector linearly decreasing from 1 to 0.
+            fade_out = linspace(1, 0, length_overlap);
+            % Generate a vector linearly increasing from 0 to 1.
+            fade_in = linspace(0, 1, length_overlap);
+
+            % Sum up the overlapping samples of the output signal and the new frames, 
+            % weighted by respectively the fade_in and fade_out vectors.
+            timeshifted_signal(1:2, index1:index2) = timeshifted_signal(1:2, index1:index2) .* [fade_out; fade_out] ...
+                                                     + final_frame(:,1:length_overlap) .* [fade_in; fade_in];                                
+            % Add the rest of the samples of framel/framer to the output (those samples do not overlap). 
+            timeshifted_signal = [timeshifted_signal, final_frame(:,length_overlap+1:end)];
+        end
+        
     end
     
-    timeshifted_signal = window_indexes;
+    timeshifted_signal = timeshifted_signal';
     
 end
 
