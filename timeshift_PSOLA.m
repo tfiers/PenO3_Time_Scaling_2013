@@ -1,21 +1,23 @@
 function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fps, alpha, window_overlap)
     % Speeds up/slows down audio with Pitch-Synchronous Overlap and Add (PSOLA).
     
-    % filename      A string giving the absolute or relative path of a .wav
-    %               file. E.g. 'Speech Materials\annelies1.wav' or
-    %               'C:\annelies1.wav'.
-    % sample_rate   E.g. 44100, which means that 44100 samples represent 1
-    %               second.
-    % overlap       A value in (0,1). 0.2 for example means that when the input
-    %               signal is broken into frames, they will overlap for 20%.
-    % fps           Frames per second. Determines in how many frames the
-    %               input signal will be chopped and how long the frames will be.
-    %               E.g. 10.
-    % alpha         A value in (0,2) that determines the amount of time
-    %               stretching. alpha in (0,1) speeds up the signal, alpha
-    %               in (1,2) slows it down. Alpha must be smaller than 1/(1-overlap),
-    %               (else there would be gaps in the output signal.)
-    %               (See in code, at definiton of 'time_shift' for explanation.)
+    % filename          A string giving the absolute or relative path of a .wav
+    %                   file. E.g. 'Speech Materials\annelies1.wav' or
+    %                   'C:\annelies1.wav'.
+    % sample_rate       E.g. 44100, which means that 44100 samples represent 1
+    %                   second.
+    % overlap           A value in (0,1). 0.2 for example means that when the input
+    %                   signal is broken into frames, they will overlap for 20%.
+    % fps               Frames per second. Determines in how many frames the
+    %                   input signal will be chopped and how long the frames will be.
+    %                   E.g. 10.
+    % alpha             A value in (0,2) that determines the amount of time
+    %                   stretching. alpha in (0,1) speeds up the signal, alpha
+    %                   in (1,2) slows it down. Alpha must be smaller than 1/(1-overlap),
+    %                   (else there would be gaps in the output signal.)
+    %                   (See in code, at definiton of 'time_shift' for explanation.)
+    % window_overlap    Similar to overlap, but applied to the Hamming
+    %                   windows within the frames.
     
     % Provide default argument values.
     if nargin == 0 % Number of arguments in.
@@ -24,6 +26,7 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
         overlap = 0.5;
         fps = 10;
         alpha = 1.5;
+        window_overlap = 0.5
     end
     
     %Determins the band size to look at while looking for a maximum to
@@ -32,6 +35,10 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
     
     %Number of peaks per Hanning-window
     PEAKS_PER_WINDOW = 2;
+    
+    %Define maximum and minumum allowed pitches to avoid extreme values.
+    MAX_PITCH = 300;
+    MIN_PITCH = 50;
     
     input = audioread(filename); % Load audio file.
     input_left = input(:, 1); % Split channels (for stereo audio)
@@ -52,6 +59,11 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
     % Pitch detection per frame.
     for i=1:number_of_frames
         pitch = autoCorrelation(frames_right(i,:), sample_rate);
+        if pitch > MAX_PITCH
+            pitch = MAX_PITCH;
+        elseif pitch < MIN_PITCH
+            pitch = MIN_PITCH;
+        end
         
         %Look for maximum value as that's definately a peak.
         max_average_value_index = 1+MARGIN_OF_ERROR_FOR_MAXIMUM;
@@ -178,6 +190,9 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
                     if (window_indexes(window_before,1) + pitchmark_distance_before + size(Hanning_windows_left, 2) - 1) > size(final_frame, 2)
                         final_frame(1,window_indexes(window_before,1) + pitchmark_distance_before : size(final_frame, 2)) = final_frame(1,window_indexes(window_before,1) + pitchmark_distance_before : size(final_frame, 2)) + Hanning_windows_left(window_before, 1 : size(final_frame, 2) - window_indexes(window_before, 1) - pitchmark_distance_before + 1);
                         final_frame(2,window_indexes(window_before,1) + pitchmark_distance_before : size(final_frame, 2)) = final_frame(2,window_indexes(window_before,1) + pitchmark_distance_before : size(final_frame, 2)) + Hanning_windows_right(window_before, 1 : size(final_frame, 2) - window_indexes(window_before, 1) - pitchmark_distance_before + 1);
+                    elseif (window_indexes(window_before,1) + pitchmark_distance_before < 1)
+                        final_frame(1, 1 : window_indexes(window_before,1) + pitchmark_distance_before + size(Hanning_windows_left, 2) - 1) = final_frame(1, 1 : window_indexes(window_before,1) + pitchmark_distance_before + size(Hanning_windows_left, 2) - 1) + Hanning_windows_left(window_before, 2 - window_indexes(window_before,1) - pitchmark_distance_before : size(Hanning_windows_left, 2));
+                        final_frame(2, 1 : window_indexes(window_before,1) + pitchmark_distance_before + size(Hanning_windows_left, 2) - 1) = final_frame(2, 1 : window_indexes(window_before,1) + pitchmark_distance_before + size(Hanning_windows_left, 2) - 1) + Hanning_windows_right(window_before, 2 - window_indexes(window_before,1) - pitchmark_distance_before : size(Hanning_windows_left, 2));
                     else
                         final_frame(1,window_indexes(window_before,1) + pitchmark_distance_before : window_indexes(window_before,1) + pitchmark_distance_before + size(Hanning_windows_left, 2) - 1) = final_frame(1,window_indexes(window_before,1) + pitchmark_distance_before : window_indexes(window_before,1) + pitchmark_distance_before + size(Hanning_windows_left, 2) - 1) + Hanning_windows_left(window_before, :);
                         final_frame(2,window_indexes(window_before,1) + pitchmark_distance_before : window_indexes(window_before,1) + pitchmark_distance_before + size(Hanning_windows_right, 2) - 1) = final_frame(2,window_indexes(window_before,1) + pitchmark_distance_before : window_indexes(window_before,1) + pitchmark_distance_before + size(Hanning_windows_right, 2) - 1) + Hanning_windows_right(window_before, :);
@@ -185,9 +200,8 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
                 end 
                 
             end
-            
+           
         end
-        
         if i==1
             timeshifted_signal = final_frame;
         else
