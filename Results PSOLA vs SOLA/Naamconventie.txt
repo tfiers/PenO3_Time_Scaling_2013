@@ -1,0 +1,3 @@
+algoritme-fps-spreker-alpha-frameOverlap
+
+vb: PSOLA2devilder1205.wav = PSOLA toegepast op devilder met 2 frames per seconde, alpha 1.2 en overlap 0.5

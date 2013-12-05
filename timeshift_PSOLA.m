@@ -1,4 +1,4 @@
-function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fps, alpha, window_overlap)
+function timeshifted_signal = timeshift_PSOLA_test(filename, sample_rate, overlap, fps, alpha, window_overlap)
     % Speeds up/slows down audio with Pitch-Synchronous Overlap and Add (PSOLA).
     
     % filename          A string giving the absolute or relative path of a .wav
@@ -103,6 +103,12 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
         Hanning_windows_left = bsxfun(@times, hann(size(Hanning_windows_left,2))', Hanning_windows_left);
         Hanning_windows_right = bsxfun(@times, hann(size(Hanning_windows_left,2))', Hanning_windows_right);
        
+        %The last window tends to contain a large amount of zeros due to the way it is calculated and is
+        %removed.
+        Hanning_windows_left = Hanning_windows_left(1:end-1,:);
+        Hanning_windows_right = Hanning_windows_right(1:end-1,:);
+        window_pitchmarks = window_pitchmarks(1:end-1,:);
+        
         %Define start and end indexes for the Hanning windows
         window_indexes = zeros(size(Hanning_windows_left,1),2);
         for j = 1:size(Hanning_windows_left,1)
@@ -141,8 +147,9 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
                 [~, window_after] = min(abs(bsxfun(@minus, window_indexes(:,1), j)));
                 
                 %Make sure the closest end index is after j and the closest
-                %begin index is before j.
-                if window_indexes(window_before, 2) < j
+                %begin index is before j. The second statement is there to
+                %avoid an index out of bounds in the loop in k below.
+                if window_indexes(window_before, 2) < j && window_before ~= size(window_pitchmarks,1)
                     window_before = window_before + 1;
                 end
                 if window_indexes(window_after, 1) > j
@@ -222,7 +229,6 @@ function timeshifted_signal = timeshift_PSOLA(filename, sample_rate, overlap, fp
             % Add the rest of the samples of framel/framer to the output (those samples do not overlap). 
             timeshifted_signal = [timeshifted_signal, final_frame(:,length_overlap+1:end)];
         end
-        
     end
     
     timeshifted_signal = timeshifted_signal';
