@@ -71,7 +71,7 @@ function timeshifted_signal = timeshift_SOLA(filename, sample_rate, overlap, fps
 
         % Synchronising the existing output and the new frame.
 
-        LOWEST_HUMAN_FUNDAMENTAL_FREQUENCY = 300; % Hz.
+        LOWEST_HUMAN_FUNDAMENTAL_FREQUENCY = 50; % Hz.
         % Equals half a period of the lowest fundemental of the human voice. 
         % (147 for sampling rate of 44100)
         maximum_offset = ceil(sample_rate / LOWEST_HUMAN_FUNDAMENTAL_FREQUENCY / 2);
